@@ -1,0 +1,6 @@
+:root { --azul-aero: #0756a2; }
+body { background: #f5f8fc; }
+.hero { background: linear-gradient(120deg, #063d73, #1677c5); }
+.card { border: 0; }
+.skip-link { position: absolute; top: .5rem; left: .5rem; z-index: 10; }
+.skip-link:focus { padding: .6rem; background: white; color: #111; }
