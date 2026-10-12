@@ -1,6 +1,323 @@
-:root { --azul-aero: #0756a2; }
-body { background: #f5f8fc; }
-.hero { background: linear-gradient(120deg, #063d73, #1677c5); }
-.card { border: 0; }
-.skip-link { position: absolute; top: .5rem; left: .5rem; z-index: 10; }
-.skip-link:focus { padding: .6rem; background: white; color: #111; }
+/* ========================================================
+   ESTILOS GENERALES - CONDOR AERORESERVA (INSPIRACIÓN DESPEGAR)
+   Cumple con estándares de Accesibilidad W3C / WCAG 2.0 y Bootstrap 5
+   ======================================================== */
+
+:root {
+    --color-primario: #4300d2;        /* Violeta Despegar */
+    --color-primario-oscuro: #2a008c;
+    --color-acento: #fa503f;          /* Coral/Naranja Ofertas */
+    --color-acento-hover: #e03827;
+    --color-fondo: #f4f6fa;
+    --color-texto: #1c1c1e;
+    --color-texto-muted: #6c757d;
+    --borde-suave: #e2e8f0;
+    --sombra-card: 0 4px 18px rgba(0, 0, 0, 0.06);
+    --sombra-hover: 0 8px 26px rgba(67, 0, 210, 0.12);
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main#contenido {
+    flex: 1;
+}
+
+/* Enlace de accesibilidad para saltar al contenido principal */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 9999;
+    padding: 0.75rem 1.25rem;
+    background: #000;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: top 0.2s ease;
+}
+.skip-link:focus {
+    top: 1rem;
+    outline: 3px solid #ffcc00;
+}
+
+/* Indicador de foco accesible para teclado */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--color-primario) !important;
+    outline-offset: 2px !important;
+}
+
+/* ========================================================
+   NAVBAR & HEADER
+   ======================================================== */
+.navbar-condor {
+    background: linear-gradient(135deg, var(--color-primario) 0%, var(--color-primario-oscuro) 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.brand-badge {
+    background-color: var(--color-acento);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: color 0.15s ease;
+}
+.nav-link:hover, .nav-link.active {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* ========================================================
+   HERO BANNER & BUSCADOR TIPO DESPEGAR
+   ======================================================== */
+.hero-despegar {
+    background: linear-gradient(135deg, #3200a8 0%, #4300d2 50%, #6810ff 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 2.5rem 2rem 3.5rem 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    box-shadow: var(--sombra-card);
+}
+
+.search-box-card {
+    background: #ffffff;
+    color: var(--color-texto);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    margin-top: -2.5rem;
+    margin-bottom: 3rem;
+}
+
+.btn-despegar {
+    background-color: var(--color-acento);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.2s ease;
+}
+.btn-despegar:hover {
+    background-color: var(--color-acento-hover);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(250, 80, 63, 0.35);
+}
+
+.btn-condor-primary {
+    background-color: var(--color-primario);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+.btn-condor-primary:hover {
+    background-color: var(--color-primario-oscuro);
+    color: white;
+}
+
+/* ========================================================
+   TARJETAS DE VUELO HORIZONTALES (VUELOS.PHP)
+   ======================================================== */
+.flight-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--borde-suave);
+    box-shadow: var(--sombra-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+.flight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-hover);
+    border-color: #cbd5e1;
+}
+
+.airline-badge {
+    background: #edf2f7;
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.flight-time {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1a202c;
+}
+
+.flight-route-line {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px;
+}
+.flight-route-line .line {
+    width: 100%;
+    height: 2px;
+    background: #cbd5e0;
+    margin: 4px 0;
+    position: relative;
+}
+.flight-route-line .icon-plane {
+    font-size: 0.9rem;
+    color: var(--color-primario);
+}
+
+.price-box {
+    background-color: #f8fafc;
+    border-left: 1px solid var(--borde-suave);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1.25rem;
+    border-radius: 0 14px 14px 0;
+}
+.price-tag {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-primario);
+    line-height: 1.1;
+}
+
+/* ========================================================
+   CARDS DE PROMOCIONES Y NOVEDADES
+   ======================================================== */
+.promo-card {
+    border-radius: 14px;
+    border: 1px solid var(--borde-suave);
+    box-shadow: var(--sombra-card);
+    transition: transform 0.2s ease;
+    background: #fff;
+    overflow: hidden;
+}
+.promo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-hover);
+}
+.promo-ribbon {
+    background: linear-gradient(135deg, var(--color-acento), #ff7b54);
+    color: white;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0 0 10px 10px;
+    display: inline-block;
+}
+
+/* ========================================================
+   BREADCRUMBS ACCESIBLES
+   ======================================================== */
+.breadcrumb-condor {
+    background: #fff;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+.breadcrumb-condor a {
+    color: var(--color-primario);
+    text-decoration: none;
+    font-weight: 500;
+}
+.breadcrumb-condor a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================================
+   SIDEBAR & FILTROS
+   ======================================================== */
+.filter-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid var(--borde-suave);
+    box-shadow: var(--sombra-card);
+    padding: 1.25rem;
+}
+
+/* ========================================================
+   PANEL Y TABLAS DE GESTIÓN
+   ======================================================== */
+.panel-kpi-card {
+    border-radius: 12px;
+    border: 1px solid var(--borde-suave);
+    background: #fff;
+    box-shadow: var(--sombra-card);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.panel-kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.table-condor {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--sombra-card);
+    border: 1px solid var(--borde-suave);
+}
+.table-condor th {
+    background-color: #f8fafc;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--borde-suave);
+}
+
+/* ========================================================
+   FOOTER INSTITUCIONAL
+   ======================================================== */
+.footer-condor {
+    background-color: #111827;
+    color: #d1d5db;
+    font-size: 0.9rem;
+    margin-top: 3.5rem;
+    border-top: 4px solid var(--color-primario);
+}
+.footer-condor a {
+    color: #9ca3af;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+.footer-condor a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+.footer-map-highlight {
+    background: rgba(67, 0, 210, 0.15);
+    border: 1px solid rgba(67, 0, 210, 0.4);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+}
