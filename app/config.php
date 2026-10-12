@@ -26,11 +26,11 @@ if (file_exists($envFile)) {
 }
 
 /**
- * Definición de constantes de conexión a MySQL.
+ * Definición de constantes de conexión a MySQL / TiDB Cloud.
  */
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_NAME', getenv('DB_NAME') ?: 'aeroreserva');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'admin123');
-define('DB_SSL',  filter_var(getenv('DB_SSL') ?: false, FILTER_VALIDATE_BOOLEAN));
+define('DB_HOST', getenv('DB_HOST') ?: 'gateway01.us-east-1.prod.aws.tidbcloud.com');
+define('DB_PORT', getenv('DB_PORT') ?: '4000');
+define('DB_NAME', getenv('DB_NAME') ?: 'tp_entornos_graficos');
+define('DB_USER', getenv('DB_USER') ?: '2j2i1kPjD1e3mQ9.root');
+define('DB_PASS', (getenv('DB_PASS') !== false && getenv('DB_PASS') !== '') ? getenv('DB_PASS') : 'v9U765yA2346J1sL');
+define('DB_SSL',  filter_var(getenv('DB_SSL') !== false ? getenv('DB_SSL') : 'true', FILTER_VALIDATE_BOOLEAN));
