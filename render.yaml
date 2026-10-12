@@ -12,11 +12,11 @@ services:
       - key: DB_PORT
         value: 4000
       - key: DB_NAME
-        value: tp_entornos_graficos
+        value: aeroreserva
       - key: DB_USER
-        value: 2j2i1kPjD1e3mQ9.root
+        value: 3MrSN5wyRo7vCVb.root
       - key: DB_PASS
-        value: v9U765yA2346J1sL
+        value: hDbw9NZfhhPJeldH
       - key: DB_SSL
         value: true
       - key: SMTP_HOST
