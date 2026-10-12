@@ -51,6 +51,7 @@ $usuario = obtenerUsuario();
             
             <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="actualizar_perfil">
+            <?= campoCsrf() ?>
 
                 <div class="row g-3">
                     <div class="col-md-6">

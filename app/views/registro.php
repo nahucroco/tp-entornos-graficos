@@ -26,6 +26,7 @@ $aerolineas = obtenerAerolineas();
 
             <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="registro_usuario">
+            <?= campoCsrf() ?>
 
                 <!-- 1. DATOS PERSONALES Y DOCUMENTACIÓN -->
                 <fieldset class="mb-4">

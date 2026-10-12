@@ -66,6 +66,7 @@ $promociones = obtenerTodasPromociones();
                             <?php if ($pr['estadoPromocion'] !== 'aprobada'): ?>
                                 <form method="post" action="index.php" class="d-inline">
                                     <input type="hidden" name="accion" value="aprobar_promocion">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="promocion_id" value="<?= $pr['codPromocion'] ?>">
                                     <input type="hidden" name="estado" value="aprobada">
                                     <button type="submit" class="btn btn-sm btn-success" title="Aprobar promoción">
@@ -77,6 +78,7 @@ $promociones = obtenerTodasPromociones();
                             <?php if ($pr['estadoPromocion'] !== 'denegada'): ?>
                                 <form method="post" action="index.php" class="d-inline">
                                     <input type="hidden" name="accion" value="aprobar_promocion">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="promocion_id" value="<?= $pr['codPromocion'] ?>">
                                     <input type="hidden" name="estado" value="denegada">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Denegar promoción">

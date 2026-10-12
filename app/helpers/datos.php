@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/paginador.php';
 
 /**
  * Funciones de acceso y manipulación de datos en MySQL/TiDB.
@@ -11,13 +12,63 @@ require_once __DIR__ . '/Database.php';
 // VUELOS
 // ==========================================
 
+function contarTotalVuelos(
+    ?string $origen = null,
+    ?string $destino = null,
+    ?string $fecha = null,
+    ?int $aerolineaId = null,
+    ?float $precioMax = null
+): int {
+    try {
+        $db = Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM vuelos v
+                INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
+                WHERE 1=1";
+        $params = [];
+
+        if (!empty($origen)) {
+            $sql .= " AND v.origenVuelo LIKE ?";
+            $params[] = '%' . $origen . '%';
+        }
+
+        if (!empty($destino)) {
+            $sql .= " AND v.destinoVuelo LIKE ?";
+            $params[] = '%' . $destino . '%';
+        }
+
+        if (!empty($fecha)) {
+            $sql .= " AND v.fechaSalidaVuelo = ?";
+            $params[] = $fecha;
+        }
+
+        if (!empty($aerolineaId)) {
+            $sql .= " AND v.codAerolinea = ?";
+            $params[] = $aerolineaId;
+        }
+
+        if (!empty($precioMax) && $precioMax > 0) {
+            $sql .= " AND v.precioVuelo <= ?";
+            $params[] = $precioMax;
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
+    } catch (Throwable $e) {
+        error_log("Error al contar vuelos: " . $e->getMessage());
+        return 0;
+    }
+}
+
 function obtenerVuelos(
     ?string $origen = null,
     ?string $destino = null,
     ?string $fecha = null,
     ?int $aerolineaId = null,
     ?float $precioMax = null,
-    string $orden = 'precio_asc'
+    string $orden = 'precio_asc',
+    ?int $limite = null,
+    int $offset = 0
 ): array {
     try {
         $db = Database::getConnection();
@@ -66,6 +117,10 @@ function obtenerVuelos(
             default:
                 $sql .= " ORDER BY v.precioVuelo ASC";
                 break;
+        }
+
+        if ($limite !== null && $limite > 0) {
+            $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
         }
 
         $stmt = $db->prepare($sql);
@@ -225,8 +280,33 @@ function obtenerTodasNovedades(): array
 // RESERVAS Y COMPRAS
 // ==========================================
 
-function obtenerReservasPorUsuario(int $codUsuario, ?string $estado = null): array
+function contarTotalReservasPorUsuario(int $codUsuario, ?string $estado = null): int
 {
+    try {
+        $db = Database::getConnection();
+        $sql = "SELECT COUNT(*) FROM reservas WHERE codUsuario = ?";
+        $params = [$codUsuario];
+
+        if (!empty($estado)) {
+            $sql .= " AND estadoReserva = ?";
+            $params[] = $estado;
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
+    } catch (Throwable $e) {
+        error_log("Error al contar reservas de usuario: " . $e->getMessage());
+        return 0;
+    }
+}
+
+function obtenerReservasPorUsuario(
+    int $codUsuario,
+    ?string $estado = null,
+    ?int $limite = null,
+    int $offset = 0
+): array {
     try {
         $db = Database::getConnection();
         $sql = "SELECT r.*, v.origenVuelo, v.destinoVuelo, v.fechaSalidaVuelo, v.horaSalidaVuelo, v.precioVuelo,
@@ -244,6 +324,11 @@ function obtenerReservasPorUsuario(int $codUsuario, ?string $estado = null): arr
         }
 
         $sql .= " ORDER BY r.fechaReserva DESC";
+
+        if ($limite !== null && $limite > 0) {
+            $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
+        }
+
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
@@ -411,7 +496,24 @@ function obtenerAerolineaDeCeo(int $codUsuarioCeo): ?array
     }
 }
 
-function obtenerVuelosPorCeo(int $codUsuarioCeo): array
+function contarTotalVuelosPorCeo(int $codUsuarioCeo): int
+{
+    try {
+        $aero = obtenerAerolineaDeCeo($codUsuarioCeo);
+        if (!$aero) {
+            return 0;
+        }
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT COUNT(*) FROM vuelos WHERE codAerolinea = ?");
+        $stmt->execute([$aero['codAerolinea']]);
+        return (int)$stmt->fetchColumn();
+    } catch (Throwable $e) {
+        error_log("Error al contar vuelos de CEO: " . $e->getMessage());
+        return 0;
+    }
+}
+
+function obtenerVuelosPorCeo(int $codUsuarioCeo, ?int $limite = null, int $offset = 0): array
 {
     try {
         $aero = obtenerAerolineaDeCeo($codUsuarioCeo);
@@ -419,12 +521,18 @@ function obtenerVuelosPorCeo(int $codUsuarioCeo): array
             return [];
         }
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT v.*, a.nombreAerolinea, a.codigoIATA,
-                              (SELECT COUNT(*) FROM reservas r WHERE r.codVuelo = v.codVuelo AND r.estadoReserva != 'cancelada') AS reservasRealizadas
-                              FROM vuelos v
-                              INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
-                              WHERE v.codAerolinea = ?
-                              ORDER BY v.fechaSalidaVuelo ASC, v.horaSalidaVuelo ASC");
+        $sql = "SELECT v.*, a.nombreAerolinea, a.codigoIATA,
+                      (SELECT COUNT(*) FROM reservas r WHERE r.codVuelo = v.codVuelo AND r.estadoReserva != 'cancelada') AS reservasRealizadas
+                      FROM vuelos v
+                      INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
+                      WHERE v.codAerolinea = ?
+                      ORDER BY v.fechaSalidaVuelo ASC, v.horaSalidaVuelo ASC";
+
+        if ($limite !== null && $limite > 0) {
+            $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
+        }
+
+        $stmt = $db->prepare($sql);
         $stmt->execute([$aero['codAerolinea']]);
         return $stmt->fetchAll();
     } catch (Throwable $e) {
@@ -828,4 +936,28 @@ function cambiarEstadoUsuario(int $id, string $nuevoEstado, ?string $tipoUsuario
         return false;
     }
 }
+
+function contarTotalUsuarios(): int
+{
+    try {
+        $db = Database::getConnection();
+        return (int)$db->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
+    } catch (Throwable $e) {
+        error_log("Error al contar usuarios: " . $e->getMessage());
+        return 0;
+    }
+}
+
+function obtenerUsuariosPaginados(int $limite = 10, int $offset = 0): array
+{
+    try {
+        $db = Database::getConnection();
+        $sql = "SELECT * FROM usuarios ORDER BY codUsuario ASC LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
+        return $db->query($sql)->fetchAll();
+    } catch (Throwable $e) {
+        error_log("Error al obtener usuarios paginados: " . $e->getMessage());
+        return [];
+    }
+}
+
 

@@ -7,8 +7,13 @@ if (!usuarioLogueado() || !esAdmin()) {
     exit;
 }
 
-$db = Database::getConnection();
-$usuarios = $db->query("SELECT * FROM usuarios ORDER BY codUsuario ASC")->fetchAll();
+$paginaActual = max(1, (int)($_GET['p'] ?? 1));
+$porPagina = 5;
+$totalUsuarios = contarTotalUsuarios();
+$totalPaginas = (int)ceil($totalUsuarios / $porPagina);
+$offset = ($paginaActual - 1) * $porPagina;
+
+$usuarios = obtenerUsuariosPaginados($porPagina, $offset);
 ?>
 
 <nav class="breadcrumb-condor" aria-label="Ruta de navegación">
@@ -71,6 +76,7 @@ $usuarios = $db->query("SELECT * FROM usuarios ORDER BY codUsuario ASC")->fetchA
                             <?php if ($u['tipoUsuario'] === 'ceo de aerolínea' && $u['estadoUsuario'] === 'pendiente'): ?>
                                 <form method="post" action="index.php" class="d-inline">
                                     <input type="hidden" name="accion" value="cambiar_estado_usuario">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="usuario_id" value="<?= $u['codUsuario'] ?>">
                                     <input type="hidden" name="nuevo_estado" value="activo">
                                     <button type="submit" class="btn btn-sm btn-success" title="Aprobar registro de CEO">
@@ -80,6 +86,7 @@ $usuarios = $db->query("SELECT * FROM usuarios ORDER BY codUsuario ASC")->fetchA
                             <?php elseif ($u['codUsuario'] !== 1): ?>
                                 <form method="post" action="index.php" class="d-inline">
                                     <input type="hidden" name="accion" value="cambiar_estado_usuario">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="usuario_id" value="<?= $u['codUsuario'] ?>">
                                     <input type="hidden" name="nuevo_estado" value="<?= $u['estadoUsuario'] === 'activo' ? 'denegado' : 'activo' ?>">
                                     <button type="submit" class="btn btn-sm <?= $u['estadoUsuario'] === 'activo' ? 'btn-outline-danger' : 'btn-outline-success' ?>">
@@ -93,4 +100,7 @@ $usuarios = $db->query("SELECT * FROM usuarios ORDER BY codUsuario ASC")->fetchA
             </tbody>
         </table>
     </div>
+
+    <!-- Paginación Numérica -->
+    <?= renderizarPaginador($paginaActual, $totalPaginas, 'admin_usuarios') ?>
 </div>

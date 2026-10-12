@@ -47,7 +47,8 @@ if ($editarId) {
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $novedadEditar ? 'modificar_novedad' : 'crear_novedad' ?>">
+            <input type="hidden" name="accion" value="<?= $novedadEditar ? 'modificar_novedad' : 'crear_novedad' ?>
+            <?= campoCsrf() ?>">
             <?php if ($novedadEditar): ?>
                 <input type="hidden" name="novedad_id" value="<?= $novedadEditar['codNovedad'] ?>">
             <?php endif; ?>
@@ -114,6 +115,7 @@ if ($editarId) {
                             </a>
                             <form method="post" action="index.php" class="d-inline" onsubmit="return confirm('¿Seguro que deseás eliminar esta novedad?');">
                                 <input type="hidden" name="accion" value="eliminar_novedad">
+            <?= campoCsrf() ?>
                                 <input type="hidden" name="novedad_id" value="<?= $nov['codNovedad'] ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                     <i class="bi bi-trash"></i>

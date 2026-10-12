@@ -40,6 +40,7 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
             <input type="hidden" name="accion" value="crear_promocion_ceo">
+            <?= campoCsrf() ?>
             <input type="hidden" name="aerolinea_id" value="<?= $aerolinea['codAerolinea'] ?>">
 
             <div class="row g-3">
@@ -112,6 +113,7 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
                             <td class="text-end">
                                 <form method="post" action="index.php" class="d-inline" onsubmit="return confirm('¿Seguro que deseás eliminar esta promoción?');">
                                     <input type="hidden" name="accion" value="eliminar_promocion_ceo">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="promocion_id" value="<?= $pr['codPromocion'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                         <i class="bi bi-trash"></i>

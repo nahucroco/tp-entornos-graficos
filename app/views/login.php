@@ -19,6 +19,7 @@ $vueloId = (int)($_GET['vuelo'] ?? 0);
             <!-- Formulario estándar de Login -->
             <form method="post" action="index.php" class="needs-validation mb-4" novalidate data-validar>
                 <input type="hidden" name="accion" value="login_credenciales">
+            <?= campoCsrf() ?>
                 <?php if ($volver): ?>
                     <input type="hidden" name="volver" value="<?= $volver ?>">
                     <input type="hidden" name="vuelo_id" value="<?= $vueloId ?>">

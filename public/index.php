@@ -4,6 +4,7 @@ session_start();
 
 require_once __DIR__ . '/../app/helpers/auth.php';
 require_once __DIR__ . '/../app/helpers/datos.php';
+require_once __DIR__ . '/../app/helpers/mailer.php';
 
 // ==========================================
 // DEMO RÁPIDO Y LOGOUT
@@ -36,6 +37,14 @@ if (isset($_GET['salir'])) {
 // ==========================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tokenCsrf = $_POST['csrf_token'] ?? null;
+    if (!validarTokenCsrf($tokenCsrf)) {
+        $_SESSION['mensaje'] = 'La sesión del formulario expiró o el token de seguridad es inválido (Protección CSRF activa). Por favor, intentá nuevamente.';
+        $_SESSION['tipo_mensaje'] = 'danger';
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+        exit;
+    }
+
     $accion = $_POST['accion'] ?? '';
 
     switch ($accion) {
@@ -96,7 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $res = registrarUsuario($nombre, $email, $clave, $telefono);
             if ($res['ok']) {
                 iniciarSesionUsuario($res['usuario']);
-                $_SESSION['mensaje'] = $res['mensaje'];
+                enviarMailBienvenida($email, $nombre);
+                $_SESSION['mensaje'] = $res['mensaje'] . ' Te enviamos un correo de bienvenida.';
                 $_SESSION['tipo_mensaje'] = 'success';
                 header('Location: index.php?pagina=reservas');
                 exit;
@@ -109,6 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'recuperar_clave':
             $email = trim($_POST['email'] ?? '');
+            if (!empty($email)) {
+                $tokenRecuperacion = bin2hex(random_bytes(16));
+                enviarMailRecuperacionClave($email, $tokenRecuperacion);
+            }
             $_SESSION['mensaje'] = 'Si el correo electrónico existe en nuestra base de datos, recibirás un enlace de recuperación a la brevedad.';
             $_SESSION['tipo_mensaje'] = 'info';
             header('Location: index.php?pagina=login');
@@ -194,7 +208,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $reservaId = (int)($_POST['reserva_id'] ?? 0);
 
             if (confirmarPagoReserva($reservaId, (int)$user['id'])) {
-                $_SESSION['mensaje'] = '¡Pago registrado exitosamente! Comprobante emitido para la reserva #' . $reservaId . '.';
+                $reservaDetalle = obtenerReservaPorId($reservaId);
+                if ($reservaDetalle) {
+                    enviarMailConfirmacionReserva($reservaDetalle);
+                }
+                $_SESSION['mensaje'] = '¡Pago registrado exitosamente! Comprobante emitido y enviado por correo para la reserva #' . $reservaId . '.';
                 $_SESSION['tipo_mensaje'] = 'success';
                 header('Location: index.php?pagina=reserva_detalle&id=' . $reservaId);
                 exit;
@@ -221,7 +239,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // --- CONTACTO ---
         case 'contacto':
-            $_SESSION['mensaje'] = '¡Muchas gracias por comunicarte! Tu mensaje fue registrado y un agente de Cóndor AeroReserva te responderá a la brevedad.';
+            $nombreContacto = trim($_POST['nombre'] ?? 'Usuario');
+            $emailContacto = trim($_POST['email'] ?? '');
+            $asuntoContacto = trim($_POST['asunto'] ?? 'Consulta general');
+            $mensajeContacto = trim($_POST['mensaje'] ?? '');
+
+            if (!empty($emailContacto)) {
+                enviarMailContacto($nombreContacto, $emailContacto, $asuntoContacto, $mensajeContacto);
+            }
+
+            $_SESSION['mensaje'] = '¡Muchas gracias por comunicarte! Tu mensaje fue registrado y te enviamos una constancia por correo.';
             $_SESSION['tipo_mensaje'] = 'success';
             header('Location: index.php?pagina=contacto');
             exit;

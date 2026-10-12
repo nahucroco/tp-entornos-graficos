@@ -122,6 +122,7 @@ $novedades = obtenerNovedadesVigentes();
                                     <td class="text-end">
                                         <form method="post" action="index.php" class="d-inline">
                                             <input type="hidden" name="accion" value="pagar_reserva">
+            <?= campoCsrf() ?>
                                             <input type="hidden" name="reserva_id" value="<?= $p['codReserva'] ?>">
                                             <button type="submit" class="btn btn-sm btn-despegar">
                                                 Pagar

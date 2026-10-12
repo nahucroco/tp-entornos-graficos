@@ -10,8 +10,15 @@ $filtroAerolinea = !empty($_GET['aerolinea']) ? (int)$_GET['aerolinea'] : null;
 $filtroPrecioMax = !empty($_GET['precio_max']) ? (float)$_GET['precio_max'] : null;
 $orden = $_GET['orden'] ?? 'precio_asc';
 
-// Consultar vuelos en la BD
-$vuelos = obtenerVuelos($filtroOrigen, $filtroDestino, $filtroFecha, $filtroAerolinea, $filtroPrecioMax, $orden);
+// Paginación numérica
+$paginaActual = max(1, (int)($_GET['p'] ?? 1));
+$porPagina = 4;
+$totalVuelos = contarTotalVuelos($filtroOrigen, $filtroDestino, $filtroFecha, $filtroAerolinea, $filtroPrecioMax);
+$totalPaginas = (int)ceil($totalVuelos / $porPagina);
+$offset = ($paginaActual - 1) * $porPagina;
+
+// Consultar vuelos en la BD con paginación
+$vuelos = obtenerVuelos($filtroOrigen, $filtroDestino, $filtroFecha, $filtroAerolinea, $filtroPrecioMax, $orden, $porPagina, $offset);
 $aerolineas = obtenerAerolineas();
 ?>
 
@@ -208,6 +215,16 @@ $aerolineas = obtenerAerolineas();
                     </article>
                 <?php endforeach; ?>
             </div>
+
+            <!-- Paginación Numérica -->
+            <?= renderizarPaginador($paginaActual, $totalPaginas, 'vuelos', array_filter([
+                'origen' => $filtroOrigen,
+                'destino' => $filtroDestino,
+                'fecha' => $filtroFecha,
+                'aerolinea' => $filtroAerolinea,
+                'precio_max' => $filtroPrecioMax,
+                'orden' => $orden
+            ])) ?>
         <?php else: ?>
             <div class="card p-5 text-center bg-white border-0 shadow-sm rounded-4">
                 <i class="bi bi-search display-3 text-muted mb-3"></i>

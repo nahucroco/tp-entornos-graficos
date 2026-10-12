@@ -88,6 +88,7 @@ $novedades = obtenerNovedadesVigentes();
                                 <!-- Botón Cancelar (Valida 72hs) -->
                                 <form method="post" action="index.php" onsubmit="return confirm('¿Estás seguro de cancelar la reserva #<?= $res['codReserva'] ?>?');">
                                     <input type="hidden" name="accion" value="cancelar_reserva">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="reserva_id" value="<?= $res['codReserva'] ?>">
                                     <?php if ($puedeCancelar): ?>
                                         <button type="submit" class="btn btn-outline-danger btn-sm" title="Cancelación disponible hasta 72hs antes">
@@ -103,6 +104,7 @@ $novedades = obtenerNovedadesVigentes();
                                 <!-- Botón Confirmar Pago -->
                                 <form method="post" action="index.php">
                                     <input type="hidden" name="accion" value="pagar_reserva">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="reserva_id" value="<?= $res['codReserva'] ?>">
                                     <button type="submit" class="btn btn-despegar btn-sm">
                                         <i class="bi bi-credit-card-2-front me-1"></i>Confirmar Pago

@@ -20,6 +20,7 @@ declare(strict_types=1);
 
             <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="contacto">
+            <?= campoCsrf() ?>
 
                 <div class="row g-3">
                     <div class="col-md-6">

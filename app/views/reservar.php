@@ -49,6 +49,7 @@ $usuario = obtenerUsuario();
         <?php else: ?>
             <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="crear_reserva">
+            <?= campoCsrf() ?>
                 <input type="hidden" name="vuelo_id" value="<?= $vuelo['codVuelo'] ?>">
                 <input type="hidden" id="precio-base" value="<?= (float)$vuelo['precioVuelo'] ?>">
 

@@ -126,12 +126,14 @@ $aerolineas = obtenerAerolineas();
                                     <td class="text-end">
                                         <form method="post" action="index.php" class="d-inline">
                                             <input type="hidden" name="accion" value="aprobar_promocion">
+            <?= campoCsrf() ?>
                                             <input type="hidden" name="promocion_id" value="<?= $p['codPromocion'] ?>">
                                             <input type="hidden" name="estado" value="aprobada">
                                             <button type="submit" class="btn btn-sm btn-success" title="Aprobar"><i class="bi bi-check-lg"></i></button>
                                         </form>
                                         <form method="post" action="index.php" class="d-inline">
                                             <input type="hidden" name="accion" value="aprobar_promocion">
+            <?= campoCsrf() ?>
                                             <input type="hidden" name="promocion_id" value="<?= $p['codPromocion'] ?>">
                                             <input type="hidden" name="estado" value="denegada">
                                             <button type="submit" class="btn btn-sm btn-danger" title="Denegar"><i class="bi bi-x-lg"></i></button>

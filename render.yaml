@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: condor-aeroreserva
+    runtime: docker
+    plan: free
+    region: ohio
+    dockerfilePath: Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DB_HOST
+        value: gateway01.us-east-1.prod.aws.tidbcloud.com
+      - key: DB_PORT
+        value: 4000
+      - key: DB_NAME
+        value: tp_entornos_graficos
+      - key: DB_USER
+        value: 2j2i1kPjD1e3mQ9.root
+      - key: DB_PASS
+        value: v9U765yA2346J1sL
+      - key: DB_SSL
+        value: true
+      - key: SMTP_HOST
+        value: ""
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        value: ""
+      - key: SMTP_PASS
+        value: ""

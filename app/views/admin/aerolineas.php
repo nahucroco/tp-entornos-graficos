@@ -44,7 +44,8 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $aeroEditar ? 'modificar_aerolinea' : 'crear_aerolinea' ?>">
+            <input type="hidden" name="accion" value="<?= $aeroEditar ? 'modificar_aerolinea' : 'crear_aerolinea' ?>
+            <?= campoCsrf() ?>">
             <?php if ($aeroEditar): ?>
                 <input type="hidden" name="aerolinea_id" value="<?= $aeroEditar['codAerolinea'] ?>">
             <?php endif; ?>
@@ -130,6 +131,7 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
                             </a>
                             <form method="post" action="index.php" class="d-inline" onsubmit="return confirm('¿Seguro que deseás eliminar la aerolínea <?= htmlspecialchars($a['nombreAerolinea']) ?>?');">
                                 <input type="hidden" name="accion" value="eliminar_aerolinea">
+            <?= campoCsrf() ?>
                                 <input type="hidden" name="aerolinea_id" value="<?= $a['codAerolinea'] ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                     <i class="bi bi-trash"></i>

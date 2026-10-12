@@ -10,7 +10,14 @@ if (!usuarioLogueado() || !esCeo()) {
 $usuario = obtenerUsuario();
 $metricas = obtenerMetricasCeo((int)$usuario['id']);
 $aerolinea = $metricas['aerolinea'];
-$vuelos = obtenerVuelosPorCeo((int)$usuario['id']);
+
+$paginaActual = max(1, (int)($_GET['p'] ?? 1));
+$porPagina = 5;
+$totalVuelosCeo = contarTotalVuelosPorCeo((int)$usuario['id']);
+$totalPaginas = (int)ceil($totalVuelosCeo / $porPagina);
+$offset = ($paginaActual - 1) * $porPagina;
+
+$vuelos = obtenerVuelosPorCeo((int)$usuario['id'], $porPagina, $offset);
 
 $editarId = !empty($_GET['editar']) ? (int)$_GET['editar'] : 0;
 $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
@@ -44,7 +51,8 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $vueloEditar ? 'modificar_vuelo' : 'crear_vuelo' ?>">
+            <input type="hidden" name="accion" value="<?= $vueloEditar ? 'modificar_vuelo' : 'crear_vuelo' ?>
+            <?= campoCsrf() ?>">
             <?php if ($vueloEditar): ?>
                 <input type="hidden" name="vuelo_id" value="<?= $vueloEditar['codVuelo'] ?>">
             <?php endif; ?>
@@ -133,6 +141,7 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
                                 </a>
                                 <form method="post" action="index.php" class="d-inline" onsubmit="return confirm('¿Seguro que deseás eliminar el vuelo #<?= $v['codVuelo'] ?>?');">
                                     <input type="hidden" name="accion" value="eliminar_vuelo">
+            <?= campoCsrf() ?>
                                     <input type="hidden" name="vuelo_id" value="<?= $v['codVuelo'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                         <i class="bi bi-trash"></i>
@@ -144,6 +153,9 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
                 </tbody>
             </table>
         </div>
+
+        <!-- Paginación Numérica -->
+        <?= renderizarPaginador($paginaActual, $totalPaginas, 'ceo_vuelos') ?>
     <?php else: ?>
         <div class="p-4 text-center text-muted">
             <i class="bi bi-airplane display-4 mb-2"></i>

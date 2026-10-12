@@ -17,6 +17,7 @@ declare(strict_types=1);
 
             <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="recuperar_clave">
+            <?= campoCsrf() ?>
 
                 <div class="mb-4">
                     <label for="recuperar-email" class="form-label small fw-bold">Correo Electrónico</label>
