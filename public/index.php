@@ -481,6 +481,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pagina = $_GET['pagina'] ?? 'inicio';
 
+// Proteger la página de perfil
+if ($pagina === 'perfil' && !usuarioLogueado()) {
+    header('Location: index.php?pagina=login&volver=perfil');
+    exit;
+}
+
 // Redirección amigable de página "panel" según rol
 if ($pagina === 'panel') {
     if (!usuarioLogueado()) {

@@ -35,11 +35,7 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
     <nav class="navbar navbar-expand-lg navbar-dark navbar-condor" aria-label="Navegación principal del sitio">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 text-white" href="index.php">
-                <span class="bg-white text-primary rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
-                    <i class="bi bi-send-fill fs-5" style="color: var(--color-primario);"></i>
-                </span>
-                <span>Cóndor<span class="fw-light ms-1 text-info">Aero</span></span>
-                <span class="badge brand-badge text-uppercase d-none d-sm-inline">Despegar Style</span>
+                <img src="/assets/img/logo_1.png" alt="Logo Cóndor Aero" width="85" height="60" class="d-inline-block align-text-top">
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menú de navegación">
