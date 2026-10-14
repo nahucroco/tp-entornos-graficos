@@ -702,6 +702,14 @@ function obtenerDistribucionUsuarios(): array
 
 function registrarUsuario(string $nombre, string $email, string $clave, string $telefono = '', string $tipoUsuario = 'usuario'): array
 {
+    
+    if (!in_array($tipoUsuario, ['usuario', 'ceo de aerolínea'], true)) {
+        return [
+            'ok' => false,
+            'mensaje' => 'El tipo de usuario seleccionado no es válido.'
+        ];
+    }
+
     try {
         $db = Database::getConnection();
         $stmt = $db->prepare("SELECT codUsuario FROM usuarios WHERE emailUsuario = ? LIMIT 1");
