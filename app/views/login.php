@@ -17,7 +17,7 @@ $vueloId = (int)($_GET['vuelo'] ?? 0);
             </div>
 
             <!-- Formulario estándar de Login -->
-            <form method="post" action="index.php" class="needs-validation mb-4" novalidate data-validar>
+            <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
                 <input type="hidden" name="accion" value="login_credenciales">
             <?= campoCsrf() ?>
                 <?php if ($volver): ?>
@@ -49,32 +49,8 @@ $vueloId = (int)($_GET['vuelo'] ?? 0);
                 </button>
             </form>
 
-            <div class="text-center small text-muted mb-4">
+            <div class="text-center small text-muted">
                 ¿No tenés una cuenta todavía? <a href="index.php?pagina=registro" class="fw-bold text-decoration-none">Registrate gratis</a>
-            </div>
-
-            <!-- CAJA DE DEMOSTRACIÓN RÁPIDA (PARA LA CÁTEDRA) -->
-            <div class="p-3 bg-light rounded-3 border">
-                <div class="fw-bold small text-dark mb-2 text-center">
-                    <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Acceso Rápido de Evaluación
-                </div>
-                <div class="d-grid gap-2">
-                    <a href="index.php?demo=pasajero<?= $volver ? "&volver=$volver&vuelo=$vueloId" : '' ?>" class="btn btn-outline-primary btn-sm text-start d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-person me-2"></i>Pasajero (Mariana)</span>
-                        <span class="badge bg-primary">usuario</span>
-                    </a>
-                    <a href="index.php?demo=ceo" class="btn btn-outline-warning text-dark btn-sm text-start d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-briefcase me-2"></i>CEO Aerolínea (Carlos)</span>
-                        <span class="badge bg-warning text-dark">ceo</span>
-                    </a>
-                    <a href="index.php?demo=admin" class="btn btn-outline-danger btn-sm text-start d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-shield-lock me-2"></i>Administrador General</span>
-                        <span class="badge bg-danger">admin</span>
-                    </a>
-                </div>
-                <div class="text-center mt-2" style="font-size: 0.75rem;">
-                    Claves para login manual: <code>admin123</code> / <code>ceo123</code> / <code>pasajero123</code>
-                </div>
             </div>
         </div>
     </div>

@@ -38,9 +38,6 @@ $usuario = obtenerUsuario();
                     <a href="index.php?pagina=login&volver=reservar&vuelo=<?= $vuelo['codVuelo'] ?>" class="btn btn-primary px-4">
                         <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
                     </a>
-                    <a href="index.php?demo=pasajero&volver=reservar&vuelo=<?= $vuelo['codVuelo'] ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-lightning-fill text-warning me-1"></i>Demo Pasajero (1 clic)
-                    </a>
                     <a href="index.php?pagina=registro" class="btn btn-outline-primary">
                         Registrarse
                     </a>

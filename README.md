@@ -15,7 +15,7 @@ Luego abrir `http://localhost:8000` en el navegador.
 ## Alcance actual
 
 - Pantalla inicial, búsqueda de vuelos y tarjetas con datos de ejemplo.
-- Registro visual y acceso de demostración con sesión para pasajero, CEO o administrador.
+- Registro de cuentas de pasajero y solicitud de cuenta CEO, con inicio de sesión por credenciales.
 - Panel con opciones según el rol y reserva simulada.
 - Bootstrap, navegación accesible básica y validación HTML/JavaScript.
 

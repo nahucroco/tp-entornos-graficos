@@ -88,33 +88,3 @@ function autenticarUsuario(string $email, string $clave): ?array
     }
     return null;
 }
-
-/**
- * Inicio de sesión rápido para demostración (1 click para pruebas de cátedra).
- */
-function iniciarSesionDemo(string $rol): bool
-{
-    $emailMap = [
-        'admin'    => 'admin@aeroreserva.com',
-        'ceo'      => 'ceo.ar@aeroreserva.com',
-        'pasajero' => 'mariana@gmail.com',
-    ];
-
-    $email = $emailMap[$rol] ?? 'mariana@gmail.com';
-
-    try {
-        $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT * FROM usuarios WHERE emailUsuario = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $usuario = $stmt->fetch();
-
-        if ($usuario) {
-            iniciarSesionUsuario($usuario);
-            return true;
-        }
-    } catch (Throwable $e) {
-        error_log("Error en login demo: " . $e->getMessage());
-    }
-
-    return false;
-}

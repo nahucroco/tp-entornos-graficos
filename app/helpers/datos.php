@@ -700,7 +700,7 @@ function obtenerDistribucionUsuarios(): array
 // MUTACIONES Y OPERACIONES CRUD
 // ==========================================
 
-function registrarUsuario(string $nombre, string $email, string $clave, string $telefono = ''): array
+function registrarUsuario(string $nombre, string $email, string $clave, string $telefono = '', string $tipoUsuario = 'usuario'): array
 {
     try {
         $db = Database::getConnection();
@@ -710,22 +710,26 @@ function registrarUsuario(string $nombre, string $email, string $clave, string $
             return ['ok' => false, 'mensaje' => 'El correo electrónico ya se encuentra registrado.'];
         }
 
+        $esCeo = $tipoUsuario === 'ceo de aerolínea';
+        $estado = $esCeo ? 'pendiente' : 'activo';
         $hash = password_hash($clave, PASSWORD_BCRYPT);
         $stmt = $db->prepare("INSERT INTO usuarios (nombreUsuario, claveUsuario, tipoUsuario, emailUsuario, telefonoUsuario, estadoUsuario, emailValidado, fechaCreacion)
-                              VALUES (?, ?, 'usuario', ?, ?, 'activo', 1, NOW())");
-        $stmt->execute([$nombre, $hash, $email, $telefono]);
+                              VALUES (?, ?, ?, ?, ?, ?, 1, NOW())");
+        $stmt->execute([$nombre, $hash, $tipoUsuario, $email, $telefono, $estado]);
         $id = (int)$db->lastInsertId();
 
         return [
             'ok' => true,
-            'mensaje' => '¡Cuenta creada con éxito! Ya podés reservar tus pasajes.',
+            'mensaje' => $esCeo
+                ? '¡Solicitud enviada con éxito! Un administrador debe aprobar tu cuenta de CEO antes de que puedas ingresar.'
+                : '¡Cuenta creada con éxito! Ya podés iniciar sesión y reservar tus pasajes.',
             'usuario' => [
                 'codUsuario' => $id,
                 'nombreUsuario' => $nombre,
                 'emailUsuario' => $email,
-                'tipoUsuario' => 'usuario',
+                'tipoUsuario' => $tipoUsuario,
                 'telefonoUsuario' => $telefono,
-                'estadoUsuario' => 'activo'
+                'estadoUsuario' => $estado
             ]
         ];
     } catch (Throwable $e) {

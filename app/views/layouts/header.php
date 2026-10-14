@@ -21,20 +21,12 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
 <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
 <header role="banner">
-    <!-- Barra superior de utilidad / acceso demo de cátedra -->
+    <!-- Barra superior de utilidad -->
     <div class="bg-dark text-white-50 py-1 small border-bottom border-secondary border-opacity-25">
-        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="container">
             <div>
                 <span class="text-light me-2"><i class="bi bi-shield-check text-success"></i> UTN FRRo · Entornos Gráficos 2026</span>
                 <span class="d-none d-md-inline text-muted">| Conexión activa: Cloud TiDB / MySQL</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="d-none d-sm-inline">Demostración de roles:</span>
-                <div class="btn-group btn-group-sm" role="group" aria-label="Cambio rápido de roles">
-                    <a href="index.php?demo=pasajero" class="btn btn-outline-light btn-sm py-0 <?= esPasajero() ? 'active bg-primary' : '' ?>" title="Ingresar como Pasajero">Pasajero</a>
-                    <a href="index.php?demo=ceo" class="btn btn-outline-light btn-sm py-0 <?= esCeo() ? 'active bg-warning text-dark' : '' ?>" title="Ingresar como CEO de Aerolínea">CEO</a>
-                    <a href="index.php?demo=admin" class="btn btn-outline-light btn-sm py-0 <?= esAdmin() ? 'active bg-danger' : '' ?>" title="Ingresar como Administrador">Admin</a>
-                </div>
             </div>
         </div>
     </div>

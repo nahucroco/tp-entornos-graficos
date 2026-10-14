@@ -6,26 +6,6 @@ require_once __DIR__ . '/../app/helpers/auth.php';
 require_once __DIR__ . '/../app/helpers/datos.php';
 require_once __DIR__ . '/../app/helpers/mailer.php';
 
-// ==========================================
-// DEMO RÁPIDO Y LOGOUT
-// ==========================================
-
-if (isset($_GET['demo'])) {
-    $rol = (string)$_GET['demo'];
-    iniciarSesionDemo($rol);
-    $_SESSION['mensaje'] = 'Sesión iniciada con éxito en modo demostración (' . htmlspecialchars($rol) . ').';
-    $_SESSION['tipo_mensaje'] = 'info';
-
-    if ($rol === 'admin') {
-        header('Location: index.php?pagina=admin_panel');
-    } elseif ($rol === 'ceo') {
-        header('Location: index.php?pagina=ceo_panel');
-    } else {
-        header('Location: index.php?pagina=reservas');
-    }
-    exit;
-}
-
 if (isset($_GET['salir'])) {
     cerrarSesion();
     header('Location: index.php');
@@ -55,8 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = autenticarUsuario($email, $clave);
 
             if ($user) {
-                if ($user['estadoUsuario'] === 'denegado') {
-                    $_SESSION['mensaje'] = 'Tu cuenta ha sido suspendida por el administrador.';
+                if ($user['estadoUsuario'] !== 'activo') {
+                    $_SESSION['mensaje'] = $user['estadoUsuario'] === 'pendiente'
+                        ? 'Tu solicitud de cuenta está pendiente de aprobación.'
+                        : 'Tu cuenta ha sido suspendida por el administrador.';
                     $_SESSION['tipo_mensaje'] = 'danger';
                     header('Location: index.php?pagina=login');
                     exit;
@@ -82,13 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         case 'registro_usuario':
-            $nombre = trim($_POST['nombre'] ?? '');
+            $nombre = trim($_POST['nombre'] ?? '') . ' ' . trim($_POST['apellido'] ?? '');
+            $nombre = trim($nombre);
             $email = trim($_POST['email'] ?? '');
             $clave = (string)($_POST['clave'] ?? '');
-            $confirmar = (string)($_POST['confirmar_clave'] ?? '');
+            $confirmar = (string)($_POST['clave_confirm'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
+            $tipoUsuario = (string)($_POST['tipo_usuario'] ?? 'usuario');
 
-            if (empty($nombre) || empty($email) || empty($clave)) {
+            if (!in_array($tipoUsuario, ['usuario', 'ceo de aerolínea'], true)) {
+                $tipoUsuario = 'usuario';
+            }
+
+            if (empty($nombre) || empty($email) || empty($clave) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['mensaje'] = 'Por favor, completá todos los campos requeridos.';
                 $_SESSION['tipo_mensaje'] = 'warning';
                 header('Location: index.php?pagina=registro');
@@ -102,13 +90,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
-            $res = registrarUsuario($nombre, $email, $clave, $telefono);
+            $res = registrarUsuario($nombre, $email, $clave, $telefono, $tipoUsuario);
             if ($res['ok']) {
-                iniciarSesionUsuario($res['usuario']);
                 enviarMailBienvenida($email, $nombre);
                 $_SESSION['mensaje'] = $res['mensaje'] . ' Te enviamos un correo de bienvenida.';
                 $_SESSION['tipo_mensaje'] = 'success';
-                header('Location: index.php?pagina=reservas');
+                header('Location: index.php?pagina=login');
                 exit;
             } else {
                 $_SESSION['mensaje'] = $res['mensaje'];
