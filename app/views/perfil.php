@@ -2,11 +2,6 @@
 declare(strict_types=1);
 require_once __DIR__ . '/../helpers/datos.php';
 
-if (!usuarioLogueado()) {
-    header('Location: index.php?pagina=login&volver=perfil');
-    exit;
-}
-
 $usuario = obtenerUsuario();
 ?>
 

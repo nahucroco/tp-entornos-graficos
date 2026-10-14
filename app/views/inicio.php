@@ -20,7 +20,7 @@ $aerolineas = obtenerAerolineas();
             </p>
         </div>
         <div class="col-lg-4 d-none d-lg-block text-end">
-            <i class="bi bi-clouds-fill display-1 text-white opacity-25"></i>
+            <img src="/assets/img/logo.png" alt="Logo Cóndor Aero" width="300" height="240" class="d-inline-block align-text-top">
         </div>
     </div>
 </section>
