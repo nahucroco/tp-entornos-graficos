@@ -481,10 +481,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pagina = $_GET['pagina'] ?? 'inicio';
 
-// Proteger la página de perfil
-if ($pagina === 'perfil' && !usuarioLogueado()) {
-    header('Location: index.php?pagina=login&volver=perfil');
+// Rutas exclusivas de Pasajeros / Usuarios Autenticados
+$rutasPasajeros = ['perfil', 'reservas', 'reserva_detalle', 'historial'];
+if (in_array($pagina, $rutasPasajeros, true) && !usuarioLogueado()) {
+    header('Location: index.php?pagina=login&volver=' . urlencode($pagina));
     exit;
+}
+
+// Rutas exclusivas de Administrador
+if (str_starts_with($pagina, 'admin_')) {
+    if (!usuarioLogueado() || !esAdmin()) {
+        header('Location: index.php?pagina=login');
+        exit;
+    }
+}
+
+// Rutas exclusivas de CEO de Aerolínea
+if (str_starts_with($pagina, 'ceo_')) {
+    if (!usuarioLogueado() || !esCeo()) {
+        header('Location: index.php?pagina=login');
+        exit;
+    }
 }
 
 // Redirección amigable de página "panel" según rol
