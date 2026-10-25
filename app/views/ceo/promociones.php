@@ -82,14 +82,14 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
     <?php if (!empty($promociones)): ?>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <th scope="col"ead class="table-light">
                     <tr>
-                        <th>Código</th>
-                        <th>Descripción</th>
-                        <th>Descuento</th>
-                        <th>Período de Vigencia</th>
-                        <th>Estado de Aprobación</th>
-                        <th class="text-end">Acciones</th>
+                        <th scope="col">Código</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Descuento</th>
+                        <th scope="col">Período de Vigencia</th>
+                        <th scope="col">Estado de Aprobación</th>
+                        <th scope="col" class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>

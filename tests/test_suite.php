@@ -370,6 +370,27 @@ $runner->assertContains('<li class="page-item active" aria-current="page"><span 
 $runner->assertContains('&laquo; Anterior', $htmlPaginador, "renderizarPaginador() incluye botón Anterior");
 $runner->assertContains('Siguiente &raquo;', $htmlPaginador, "renderizarPaginador() incluye botón Siguiente");
 
+// 4.8 Accesibilidad semántica de tablas: los encabezados declaran su alcance
+$vistasConEncabezadosSinScope = [];
+$iteradorVistas = new RecursiveIteratorIterator(
+    new RecursiveDirectoryIterator(__DIR__ . '/../app/views', FilesystemIterator::SKIP_DOTS)
+);
+foreach ($iteradorVistas as $archivoVista) {
+    if ($archivoVista->getExtension() !== 'php') {
+        continue;
+    }
+
+    $contenidoVista = file_get_contents($archivoVista->getPathname());
+    if (preg_match('/<th(?![^>]*\\bscope=)/', $contenidoVista)) {
+        $vistasConEncabezadosSinScope[] = $archivoVista->getFilename();
+    }
+}
+$runner->assert(
+    empty($vistasConEncabezadosSinScope),
+    "Los encabezados de tablas declaran scope para lectores de pantalla",
+    implode(', ', $vistasConEncabezadosSinScope)
+);
+
 // -------------------------------------------------------------
 // SECCIÓN 5: PRUEBAS HTTP END-TO-END (Web Server en 127.0.0.1:8000)
 // -------------------------------------------------------------

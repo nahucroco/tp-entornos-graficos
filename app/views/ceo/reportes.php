@@ -66,15 +66,15 @@ $vuelos = obtenerVuelosPorCeo((int)$usuario['id']);
     <?php if (!empty($vuelos)): ?>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <th scope="col"ead class="table-light">
                     <tr>
-                        <th>Vuelo</th>
-                        <th>Ruta</th>
-                        <th>Fecha</th>
-                        <th>Tarifa</th>
-                        <th>Asientos Disp.</th>
-                        <th>Reservados</th>
-                        <th style="min-width: 150px;">Ocupación (%)</th>
+                        <th scope="col">Vuelo</th>
+                        <th scope="col">Ruta</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Tarifa</th>
+                        <th scope="col">Asientos Disp.</th>
+                        <th scope="col">Reservados</th>
+                        <th scope="col" style="min-width: 150px;">Ocupación (%)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -103,15 +103,15 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
 
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <th scope="col"ead class="table-light">
                 <tr>
-                    <th>Cód.</th>
-                    <th>Nombre</th>
-                    <th>IATA</th>
-                    <th>País</th>
-                    <th>CEO Responsable</th>
-                    <th>Vuelos</th>
-                    <th class="text-end">Acciones</th>
+                    <th scope="col">Cód.</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">IATA</th>
+                    <th scope="col">País</th>
+                    <th scope="col">CEO Responsable</th>
+                    <th scope="col">Vuelos</th>
+                    <th scope="col" class="text-end">Acciones</th>
                 </tr>
             </thead>
             <tbody>

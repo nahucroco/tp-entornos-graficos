@@ -52,14 +52,14 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($comprasConfirmadas)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <th scope="col"ead class="table-light">
                             <tr>
-                                <th>Código</th>
-                                <th>Fecha Emisión</th>
-                                <th>Trayecto / Vuelo</th>
-                                <th>Total Pagado</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acción</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Fecha Emisión</th>
+                                <th scope="col">Trayecto / Vuelo</th>
+                                <th scope="col">Total Pagado</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="text-end">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,14 +98,14 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($pendientes)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <th scope="col"ead class="table-light">
                             <tr>
-                                <th>Código</th>
-                                <th>Fecha</th>
-                                <th>Trayecto / Vuelo</th>
-                                <th>Total a Pagar</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acción</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Trayecto / Vuelo</th>
+                                <th scope="col">Total a Pagar</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="text-end">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,14 +152,14 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($canceladas)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 text-muted">
-                        <thead class="table-light">
+                        <th scope="col"ead class="table-light">
                             <tr>
-                                <th>Código</th>
-                                <th>Fecha</th>
-                                <th>Trayecto</th>
-                                <th>Monto Liberado</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acción</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Trayecto</th>
+                                <th scope="col">Monto Liberado</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="text-end">Acción</th>
                             </tr>
                         </thead>
                         <tbody>

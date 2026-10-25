@@ -95,7 +95,7 @@ $distribucionUsuarios = obtenerDistribucionUsuarios();
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <th scope="col"ead class="table-light">
                             <tr>
                                 <th scope="col" class="ps-3">Aerolínea</th>
                                 <th scope="col" class="text-center">Reservas</th>
@@ -188,7 +188,7 @@ $distribucionUsuarios = obtenerDistribucionUsuarios();
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <th scope="col"ead class="table-light">
                     <tr>
                         <th scope="col" class="ps-3">Vuelo</th>
                         <th scope="col">Ruta</th>

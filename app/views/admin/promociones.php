@@ -30,15 +30,15 @@ $promociones = obtenerTodasPromociones();
 <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <th scope="col"ead class="table-light">
                 <tr>
-                    <th>Código</th>
-                    <th>Aerolínea</th>
-                    <th>Descripción</th>
-                    <th>Descuento</th>
-                    <th>Vigencia</th>
-                    <th>Estado</th>
-                    <th class="text-end">Decisión</th>
+                    <th scope="col">Código</th>
+                    <th scope="col">Aerolínea</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Descuento</th>
+                    <th scope="col">Vigencia</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col" class="text-end">Decisión</th>
                 </tr>
             </thead>
             <tbody>

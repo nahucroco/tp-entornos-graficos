@@ -101,13 +101,13 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
             <?php if (!empty($vuelos)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                        <th scope="col"ead class="table-light">
                             <tr>
-                                <th>#</th>
-                                <th>Ruta</th>
-                                <th>Fecha / Hora</th>
-                                <th>Tarifa</th>
-                                <th>Asientos</th>
+                                <th scope="col">#</th>
+                                <th scope="col">Ruta</th>
+                                <th scope="col">Fecha / Hora</th>
+                                <th scope="col">Tarifa</th>
+                                <th scope="col">Asientos</th>
                             </tr>
                         </thead>
                         <tbody>

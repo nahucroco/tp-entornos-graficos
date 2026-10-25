@@ -109,16 +109,16 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
     <?php if (!empty($vuelos)): ?>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <th scope="col"ead class="table-light">
                     <tr>
-                        <th>Código</th>
-                        <th>Origen → Destino</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Precio</th>
-                        <th>Disponibilidad</th>
-                        <th>Reservas</th>
-                        <th class="text-end">Acciones</th>
+                        <th scope="col">Código</th>
+                        <th scope="col">Origen → Destino</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Disponibilidad</th>
+                        <th scope="col">Reservas</th>
+                        <th scope="col" class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
