@@ -64,6 +64,17 @@ php tests/test_suite.php
 
 ---
 
+## ♿ Validación de Accesibilidad
+
+Se evaluó la página de inicio desplegada en [TAW](https://www.tawdis.net/) bajo las pautas **WCAG 2.1, nivel AA**, para tecnologías HTML y CSS.
+
+- La primera evaluación identificó **2 problemas automáticos** en el criterio 1.3.1 (Información y relaciones).
+- Se corrigió la agrupación del selector de tipo de viaje mediante los elementos semánticos `fieldset` y `legend`.
+- La evaluación final informó **0 problemas detectados de forma automática**.
+- TAW mantiene advertencias y criterios no verificados que requieren revisión manual, principalmente sobre navegación por teclado, foco visible, etiquetas de formulario y alternativas textuales.
+
+---
+
 ## 📐 Arquitectura del Sistema
 
 - **Front Controller Pattern:** [`public/index.php`](public/index.php) centraliza todas las peticiones POST y solicitudes de vistas GET.
