@@ -3,10 +3,9 @@ declare(strict_types=1);
 $usuario = obtenerUsuario();
 $rol = obtenerRolUsuario();
 $paginaActual = $_GET['pagina'] ?? 'inicio';
-$modoContraste = $_COOKIE['modo_contraste'] ?? 'normal';
 ?>
 <!doctype html>
-<html lang="es" <?= $modoContraste === 'alto' ? 'data-bs-theme="dark"' : '' ?>>
+<html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,28 +17,10 @@ $modoContraste = $_COOKIE['modo_contraste'] ?? 'normal';
     <!-- Estilos personalizados inspirados en Despegar -->
     <link href="assets/css/estilos.css" rel="stylesheet">
 </head>
-<body class="<?= $modoContraste === 'alto' ? 'alto-contraste' : '' ?>">
+<body>
 <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
 <header role="banner">
-    <!-- Barra superior de utilidad y accesibilidad -->
-    <div class="bg-dark text-white-50 py-1 small border-bottom border-secondary border-opacity-25">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div>
-                <span class="text-light me-2"><i class="bi bi-shield-check text-success"></i> UTN FRRo · Entornos Gráficos 2026</span>
-                <span class="d-none d-md-inline text-muted">| Conexión activa: Cloud TiDB / MySQL</span>
-            </div>
-            <div>
-                <!-- Persistencia de Preferencia de Accesibilidad mediante Cookie según Cátedra EG -->
-                <a href="index.php?cambiar_contraste=1" class="btn btn-sm btn-outline-warning py-0 px-2 small d-inline-flex align-items-center gap-1" title="Alternar modo de alto contraste para personas con baja visión (Guía WCAG 2.0 / Unidad 6)">
-                    <i class="bi bi-circle-half"></i>
-                    <span class="d-none d-sm-inline">Contraste:</span>
-                    <strong><?= $modoContraste === 'alto' ? 'Alto (Activo)' : 'Normal' ?></strong>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- Navegación principal -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-condor" aria-label="Navegación principal del sitio">
         <div class="container">

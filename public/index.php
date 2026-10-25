@@ -12,17 +12,6 @@ if (isset($_GET['salir'])) {
     exit;
 }
 
-// Gestión de Cookies de Preferencias (Accesibilidad / Alto Contraste según Cátedra EG)
-if (isset($_GET['cambiar_contraste'])) {
-    $modoActual = $_COOKIE['modo_contraste'] ?? 'normal';
-    $nuevoModo = ($modoActual === 'alto') ? 'normal' : 'alto';
-    setcookie('modo_contraste', $nuevoModo, time() + (86400 * 90), '/');
-    $_COOKIE['modo_contraste'] = $nuevoModo;
-    $volver = $_SERVER['HTTP_REFERER'] ?? 'index.php';
-    header('Location: ' . $volver);
-    exit;
-}
-
 // ==========================================
 // PROCESAMIENTO DE FORMULARIOS (POST)
 // ==========================================

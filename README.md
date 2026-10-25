@@ -22,13 +22,9 @@ Acceder desde el navegador a: `http://127.0.0.1:8000`
 
 ---
 
-## 🗄️ Base de Datos y Seeding Automatizado
+## 🗄️ Base de Datos
 
-El esquema se encuentra en [`database/schema.sql`](database/schema.sql). Para poblar o actualizar la base de datos de forma segura e idempotente con usuarios, aerolíneas, promociones vigentes, catálogo de vuelos, novedades y reservas de prueba:
-
-```bash
-php database/seeder.php
-```
+El esquema se encuentra en [`database/schema.sql`](database/schema.sql).
 
 ### 🔑 Credenciales Oficiales de Prueba:
 
@@ -45,19 +41,6 @@ php database/seeder.php
 | **Usuario Suspendido** | `usuario.suspendido@gmail.com` | `pasajero123` | Estado denegado (bloqueo por sanción) |
 
 ---
-
-## 🧪 Suite de Pruebas Automatizadas
-
-El proyecto cuenta con una suite completa de pruebas unitarias, de integración y HTTP End-to-End con soporte de cookies de sesión y tokens CSRF:
-
-```bash
-php tests/test_suite.php
-```
-
-### Cobertura de las pruebas (113/113 tests exitosos):
-- **Capa de Datos:** Singleton PDO con SSL, transacciones atómicas de reserva, decremento de cupos y liberación de asientos ante cancelación.
-- **Reglas de Negocio:** Validación estricta de la regla de cancelación hasta 72 horas antes de la salida del vuelo (Regla #13).
-- **Seguridad:** Tokens CSRF criptográficos con `hash_equals()`, hashing Bcrypt (`password_hash` / `password_verify`), protección contra inyección SQL y timing attacks.
 - **Control de Acceso (RBAC):** Guards en el Front Controller que garantizan que roles no autorizados o invitados sean redirigidos inmediatamente con HTTP 302 hacia el login.
 - **Rutas Públicas y Privadas:** Cobertura HTTP 200 en todas las vistas públicas y redirecciones 302 seguras en todas las vistas protegidas.
 - **Paginación:** Renderizado dinámico de navegación accesible WAI-AA y Bootstrap 5.3.
