@@ -507,6 +507,22 @@ $loginPostUser = $runner->httpPost('index.php', [
 $runner->assertEqual(302, $loginPostUser['code'], "Login de Pasajero responde 302 Redirección");
 $runner->assertContains('Location: index.php?pagina=reservas', $loginPostUser['headers'], "Login de Pasajero redirige a 'reservas'");
 
+// 6.3.1 El login conserva el flujo de reserva solicitado antes de autenticarse
+$cookieJarReserva = tempnam(sys_get_temp_dir(), 'condor_reserva_');
+$loginGetReserva = $runner->httpGet('index.php?pagina=login&volver=reservar&vuelo=1', $cookieJarReserva);
+$csrfReserva = $runner->extractCsrfToken($loginGetReserva['body']);
+$loginPostReserva = $runner->httpPost('index.php', [
+    'accion' => 'login_credenciales',
+    'csrf_token' => $csrfReserva,
+    'email' => 'mariana@gmail.com',
+    'clave' => 'pasajero123',
+    'volver' => 'reservar',
+    'vuelo_id' => '1',
+], $cookieJarReserva);
+$runner->assertEqual(302, $loginPostReserva['code'], "Login desde una reserva responde 302 Redirección");
+$runner->assertContains('Location: index.php?pagina=reservar&vuelo=1', $loginPostReserva['headers'], "Login conserva el vuelo solicitado y vuelve a la reserva");
+@unlink($cookieJarReserva);
+
 $userPerfilGet = $runner->httpGet('index.php?pagina=perfil', $cookieJarUser);
 $runner->assertEqual(200, $userPerfilGet['code'], "Pasajero accede a su perfil (HTTP 200 OK)");
 

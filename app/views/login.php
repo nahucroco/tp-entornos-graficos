@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$volver = htmlspecialchars($_GET['volver'] ?? '');
+$volver = (string)($_GET['volver'] ?? '');
 $vueloId = (int)($_GET['vuelo'] ?? 0);
 ?>
 
@@ -21,7 +21,7 @@ $vueloId = (int)($_GET['vuelo'] ?? 0);
                 <input type="hidden" name="accion" value="login_credenciales">
             <?= campoCsrf() ?>
                 <?php if ($volver): ?>
-                    <input type="hidden" name="volver" value="<?= $volver ?>">
+                    <input type="hidden" name="volver" value="<?= htmlspecialchars($volver) ?>">
                     <input type="hidden" name="vuelo_id" value="<?= $vueloId ?>">
                 <?php endif; ?>
 

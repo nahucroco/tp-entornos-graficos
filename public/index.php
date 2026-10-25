@@ -64,7 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($user['tipoUsuario'] === 'ceo de aerolínea') {
                     header('Location: index.php?pagina=ceo_panel');
                 } else {
-                    header('Location: index.php?pagina=reservas');
+                    $destino = 'index.php?pagina=reservas';
+                    $volver = (string)($_POST['volver'] ?? '');
+
+                    if ($volver === 'reservar') {
+                        $vueloId = filter_var($_POST['vuelo_id'] ?? null, FILTER_VALIDATE_INT);
+                        if ($vueloId && obtenerVueloPorId((int)$vueloId)) {
+                            $destino = 'index.php?pagina=reservar&vuelo=' . $vueloId;
+                        }
+                    } elseif (in_array($volver, ['reservas', 'historial'], true)) {
+                        $destino = 'index.php?pagina=' . $volver;
+                    }
+
+                    header('Location: ' . $destino);
                 }
                 exit;
             } else {
