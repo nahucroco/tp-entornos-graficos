@@ -1,6 +1,5 @@
 .env
 /vendor/
 *.log
-*.md
 .DS_Store
 Thumbs.db
