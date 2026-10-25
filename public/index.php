@@ -12,6 +12,17 @@ if (isset($_GET['salir'])) {
     exit;
 }
 
+// Gestión de Cookies de Preferencias (Accesibilidad / Alto Contraste según Cátedra EG)
+if (isset($_GET['cambiar_contraste'])) {
+    $modoActual = $_COOKIE['modo_contraste'] ?? 'normal';
+    $nuevoModo = ($modoActual === 'alto') ? 'normal' : 'alto';
+    setcookie('modo_contraste', $nuevoModo, time() + (86400 * 90), '/');
+    $_COOKIE['modo_contraste'] = $nuevoModo;
+    $volver = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+    header('Location: ' . $volver);
+    exit;
+}
+
 // ==========================================
 // PROCESAMIENTO DE FORMULARIOS (POST)
 // ==========================================
@@ -537,6 +548,8 @@ $vistasDisponibles = [
     'promociones'        => __DIR__ . '/../app/views/promociones.php',
     'novedades'          => __DIR__ . '/../app/views/novedades.php',
     'mapa_sitio'         => __DIR__ . '/../app/views/mapa_sitio.php',
+    'mapa'               => __DIR__ . '/../app/views/mapa_sitio.php',
+    '404'                => __DIR__ . '/../app/views/404.php',
     'contacto'           => __DIR__ . '/../app/views/contacto.php',
     'terminos'           => __DIR__ . '/../app/views/terminos.php',
     // Autenticación y Perfil
@@ -558,7 +571,12 @@ $vistasDisponibles = [
     'admin_reportes'     => __DIR__ . '/../app/views/admin/reportes.php',
 ];
 
-$vistaArchivo = $vistasDisponibles[$pagina] ?? $vistasDisponibles['inicio'];
+if (!array_key_exists($pagina, $vistasDisponibles)) {
+    http_response_code(404);
+    $vistaArchivo = $vistasDisponibles['404'];
+} else {
+    $vistaArchivo = $vistasDisponibles[$pagina];
+}
 
 // RENDERIZADO DEL LAYOUT
 require __DIR__ . '/../app/views/layouts/header.php';

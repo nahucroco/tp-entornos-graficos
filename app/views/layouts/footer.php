@@ -50,7 +50,7 @@
                     Navegación jerárquica y árbol de contenido funcional permanente:
                 </p>
                 <div class="footer-map-highlight w-100">
-                    <a class="d-flex align-items-center justify-content-between text-white fw-bold text-decoration-none" href="index.php?pagina=mapa">
+                    <a class="d-flex align-items-center justify-content-between text-white fw-bold text-decoration-none" href="index.php?pagina=mapa_sitio" title="Explorar el mapa y estructura del sitio web">
                         <span><i class="bi bi-diagram-3 me-2 text-warning fs-5"></i>Mapa del Sitio Web</span>
                         <i class="bi bi-arrow-right-circle fs-5 text-warning"></i>
                     </a>

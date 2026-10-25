@@ -395,6 +395,19 @@ foreach ($rutasPublicas as $nombre => $ruta) {
     $runner->assertEqual(200, $resp['code'], "Ruta pública '{$nombre}' ({$ruta}) responde HTTP 200 OK");
 }
 
+// 5.1.1 Ruta 404 personalizada explicativa
+$resp404 = $runner->httpGet('index.php?pagina=ruta_inexistente_xyz');
+$runner->assertEqual(404, $resp404['code'], "Ruta inexistente responde HTTP 404 con vista personalizada explicativa");
+$runner->assertContains('Página no encontrada (Error 404)', $resp404['body'], "Página 404 contiene título y mensaje explicativo");
+
+// 5.1.2 Gestión de Cookie de Accesibilidad (Modo Alto Contraste según Cátedra EG)
+$jarCookieTest = tempnam(sys_get_temp_dir(), 'condor_cookie_');
+$respContraste = $runner->httpGet('index.php?cambiar_contraste=1', $jarCookieTest);
+$runner->assertEqual(302, $respContraste['code'], "Cambio de modo contraste responde 302 y persiste cookie 'modo_contraste'");
+$respConCookie = $runner->httpGet('index.php', $jarCookieTest);
+$runner->assertContains('alto-contraste', $respConCookie['body'], "Página renderiza clase 'alto-contraste' al recibir cookie activa");
+@unlink($jarCookieTest);
+
 // 5.2 Protección de Rutas Privadas (Redirección 302 hacia login sin sesión)
 $rutasProtegidas = [
     'Perfil' => 'index.php?pagina=perfil',

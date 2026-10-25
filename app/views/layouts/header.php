@@ -3,9 +3,10 @@ declare(strict_types=1);
 $usuario = obtenerUsuario();
 $rol = obtenerRolUsuario();
 $paginaActual = $_GET['pagina'] ?? 'inicio';
+$modoContraste = $_COOKIE['modo_contraste'] ?? 'normal';
 ?>
 <!doctype html>
-<html lang="es">
+<html lang="es" <?= $modoContraste === 'alto' ? 'data-bs-theme="dark"' : '' ?>>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,16 +18,24 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
     <!-- Estilos personalizados inspirados en Despegar -->
     <link href="assets/css/estilos.css" rel="stylesheet">
 </head>
-<body>
+<body class="<?= $modoContraste === 'alto' ? 'alto-contraste' : '' ?>">
 <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
 <header role="banner">
-    <!-- Barra superior de utilidad -->
+    <!-- Barra superior de utilidad y accesibilidad -->
     <div class="bg-dark text-white-50 py-1 small border-bottom border-secondary border-opacity-25">
-        <div class="container">
+        <div class="container d-flex justify-content-between align-items-center">
             <div>
                 <span class="text-light me-2"><i class="bi bi-shield-check text-success"></i> UTN FRRo · Entornos Gráficos 2026</span>
                 <span class="d-none d-md-inline text-muted">| Conexión activa: Cloud TiDB / MySQL</span>
+            </div>
+            <div>
+                <!-- Persistencia de Preferencia de Accesibilidad mediante Cookie según Cátedra EG -->
+                <a href="index.php?cambiar_contraste=1" class="btn btn-sm btn-outline-warning py-0 px-2 small d-inline-flex align-items-center gap-1" title="Alternar modo de alto contraste para personas con baja visión (Guía WCAG 2.0 / Unidad 6)">
+                    <i class="bi bi-circle-half"></i>
+                    <span class="d-none d-sm-inline">Contraste:</span>
+                    <strong><?= $modoContraste === 'alto' ? 'Alto (Activo)' : 'Normal' ?></strong>
+                </a>
             </div>
         </div>
     </div>
@@ -35,7 +44,7 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
     <nav class="navbar navbar-expand-lg navbar-dark navbar-condor" aria-label="Navegación principal del sitio">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4 text-white" href="index.php">
-                <img src="/assets/img/logo_1.png" alt="Logo Cóndor Aero" width="85" height="60" class="d-inline-block align-text-top">
+                <img src="/assets/img/logo_1.png" alt="Logo de Cóndor AeroReserva" title="Cóndor AeroReserva - Volver al Inicio" width="85" height="60" class="d-inline-block align-text-top">
             </a>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menú de navegación">
