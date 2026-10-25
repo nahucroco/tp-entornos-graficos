@@ -27,20 +27,23 @@ $aerolineas = obtenerAerolineas();
 
 <!-- WIDGET DE BÚSQUEDA FLOTANTE (ESTILO DESPEGAR) -->
 <section class="search-box-card" aria-label="Buscador de vuelos">
-    <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-2">
-        <span class="fw-bold text-primary"><i class="bi bi-airplane me-2"></i>Vuelos</span>
-        <div class="form-check form-check-inline mb-0">
-            <input class="form-check-input" type="radio" name="tipoViaje" id="idaVuelta" value="ida_vuelta" checked>
-            <label class="form-check-label small fw-semibold" for="idaVuelta">Ida y vuelta</label>
-        </div>
-        <div class="form-check form-check-inline mb-0">
-            <input class="form-check-input" type="radio" name="tipoViaje" id="soloIda" value="solo_ida">
-            <label class="form-check-label small fw-semibold" for="soloIda">Solo ida</label>
-        </div>
-    </div>
-
     <form method="get" action="index.php" class="needs-validation" novalidate>
         <input type="hidden" name="pagina" value="vuelos">
+        <fieldset class="border-0 p-0 m-0 mb-3">
+            <legend class="float-none w-auto p-0 mb-2 fw-bold text-primary">
+                <i class="bi bi-airplane me-2" aria-hidden="true"></i>Vuelos
+            </legend>
+            <div class="d-flex align-items-center gap-3 border-bottom pb-2">
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="radio" name="tipoViaje" id="idaVuelta" value="ida_vuelta" checked>
+                    <label class="form-check-label small fw-semibold" for="idaVuelta">Ida y vuelta</label>
+                </div>
+                <div class="form-check form-check-inline mb-0">
+                    <input class="form-check-input" type="radio" name="tipoViaje" id="soloIda" value="solo_ida">
+                    <label class="form-check-label small fw-semibold" for="soloIda">Solo ida</label>
+                </div>
+            </div>
+        </fieldset>
         <div class="row g-3 align-items-end">
             <!-- Origen -->
             <div class="col-md-3">
