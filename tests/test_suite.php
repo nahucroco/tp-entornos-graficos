@@ -416,7 +416,14 @@ foreach ($rutasPublicas as $nombre => $ruta) {
     $runner->assertEqual(200, $resp['code'], "Ruta pública '{$nombre}' ({$ruta}) responde HTTP 200 OK");
 }
 
-// 5.1.1 Ruta 404 personalizada explicativa
+// 5.1.1 El mapa público no expone enlaces destinados a usuarios autenticados.
+$mapaPublico = $runner->httpGet('index.php?pagina=mapa_sitio');
+$runner->assertContains('Crear cuenta de pasajero', $mapaPublico['body'], "Mapa público muestra opciones de acceso para visitantes");
+$runner->assert(!str_contains($mapaPublico['body'], 'pagina=admin_panel'), "Mapa público no muestra accesos de administrador");
+$runner->assert(!str_contains($mapaPublico['body'], 'pagina=ceo_panel'), "Mapa público no muestra accesos de CEO");
+$runner->assert(!str_contains($mapaPublico['body'], 'pagina=reservas'), "Mapa público no muestra accesos de pasajero");
+
+// 5.1.2 Ruta 404 personalizada explicativa
 $resp404 = $runner->httpGet('index.php?pagina=ruta_inexistente_xyz');
 $runner->assertEqual(404, $resp404['code'], "Ruta inexistente responde HTTP 404 con vista personalizada explicativa");
 $runner->assertContains('Página no encontrada (Error 404)', $resp404['body'], "Página 404 contiene título y mensaje explicativo");
@@ -490,6 +497,11 @@ $runner->assertEqual(200, $adminUsuariosGet['code'], "Admin accede a gestión de
 $adminAeroGet = $runner->httpGet('index.php?pagina=admin_aerolineas', $cookieJarAdmin);
 $runner->assertEqual(200, $adminAeroGet['code'], "Admin accede a gestión de aerolíneas (HTTP 200 OK)");
 
+$mapaAdmin = $runner->httpGet('index.php?pagina=mapa_sitio', $cookieJarAdmin);
+$runner->assertContains('Administración general', $mapaAdmin['body'], "Mapa de administrador muestra su área de gestión");
+$runner->assert(!str_contains($mapaAdmin['body'], 'pagina=ceo_panel'), "Mapa de administrador no muestra accesos de CEO");
+$runner->assert(!str_contains($mapaAdmin['body'], 'pagina=reservas'), "Mapa de administrador no muestra accesos de pasajero");
+
 // 6.2 Flujo de CEO de Aerolínea
 $loginGetCeo = $runner->httpGet('index.php?pagina=login', $cookieJarCeo);
 $csrfCeo = $runner->extractCsrfToken($loginGetCeo['body']);
@@ -509,6 +521,11 @@ $runner->assertEqual(200, $ceoPanelGet['code'], "Acceso autenticado a ceo_panel 
 
 $ceoVuelosGet = $runner->httpGet('index.php?pagina=ceo_vuelos', $cookieJarCeo);
 $runner->assertEqual(200, $ceoVuelosGet['code'], "CEO accede a gestión de vuelos propios (HTTP 200 OK)");
+
+$mapaCeo = $runner->httpGet('index.php?pagina=mapa_sitio', $cookieJarCeo);
+$runner->assertContains('Panel CEO de aerolínea', $mapaCeo['body'], "Mapa de CEO muestra su área de gestión");
+$runner->assert(!str_contains($mapaCeo['body'], 'pagina=admin_panel'), "Mapa de CEO no muestra accesos de administrador");
+$runner->assert(!str_contains($mapaCeo['body'], 'pagina=reservas'), "Mapa de CEO no muestra accesos de pasajero");
 
 // Intento de CEO accediendo a admin_panel -> Debe ser bloqueado
 $ceoAccessAdmin = $runner->httpGet('index.php?pagina=admin_panel', $cookieJarCeo);
@@ -549,6 +566,11 @@ $runner->assertEqual(200, $userPerfilGet['code'], "Pasajero accede a su perfil (
 
 $userReservasGet = $runner->httpGet('index.php?pagina=reservas', $cookieJarUser);
 $runner->assertEqual(200, $userReservasGet['code'], "Pasajero accede a sus reservas (HTTP 200 OK)");
+
+$mapaPasajero = $runner->httpGet('index.php?pagina=mapa_sitio', $cookieJarUser);
+$runner->assertContains('Área de pasajero', $mapaPasajero['body'], "Mapa de pasajero muestra sus reservas e historial");
+$runner->assert(!str_contains($mapaPasajero['body'], 'pagina=admin_panel'), "Mapa de pasajero no muestra accesos de administrador");
+$runner->assert(!str_contains($mapaPasajero['body'], 'pagina=ceo_panel'), "Mapa de pasajero no muestra accesos de CEO");
 
 // Intento de Pasajero accediendo a paneles de CEO o Admin -> Debe ser bloqueado
 $userAccessCeo = $runner->httpGet('index.php?pagina=ceo_panel', $cookieJarUser);
