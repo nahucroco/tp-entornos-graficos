@@ -52,7 +52,7 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($comprasConfirmadas)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <th scope="col"ead class="table-light">
+                        <thead class="table-light">
                             <tr>
                                 <th scope="col">Código</th>
                                 <th scope="col">Fecha Emisión</th>
@@ -98,7 +98,7 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($pendientes)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <th scope="col"ead class="table-light">
+                        <thead class="table-light">
                             <tr>
                                 <th scope="col">Código</th>
                                 <th scope="col">Fecha</th>
@@ -152,7 +152,7 @@ $novedades = obtenerNovedadesVigentes();
             <?php if (!empty($canceladas)): ?>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 text-muted">
-                        <th scope="col"ead class="table-light">
+                        <thead class="table-light">
                             <tr>
                                 <th scope="col">Código</th>
                                 <th scope="col">Fecha</th>

@@ -322,3 +322,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     display: inline-block;
 }
 
+/* Diferenciación visual de enlaces visitados en contenido */
+main a:not(.btn):not(.nav-link):not(.navbar-brand):visited {
+    color: #5b21b6;
+}
+
+

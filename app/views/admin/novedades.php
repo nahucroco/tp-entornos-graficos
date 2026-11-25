@@ -91,7 +91,7 @@ if ($editarId) {
 
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <th scope="col"ead class="table-light">
+            <thead class="table-light">
                 <tr>
                     <th scope="col">Código</th>
                     <th scope="col">Mensaje / Comunicado</th>
