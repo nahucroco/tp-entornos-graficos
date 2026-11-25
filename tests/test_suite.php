@@ -370,7 +370,13 @@ $runner->assertContains('<li class="page-item active" aria-current="page"><span 
 $runner->assertContains('&laquo; Anterior', $htmlPaginador, "renderizarPaginador() incluye botón Anterior");
 $runner->assertContains('Siguiente &raquo;', $htmlPaginador, "renderizarPaginador() incluye botón Siguiente");
 
-// 4.8 Accesibilidad semántica de tablas: los encabezados declaran su alcance
+// 4.8 Coherencia de fechas: no se admiten vuelos vencidos ni fechas de nacimiento futuras.
+$runner->assert(fechaHoraVueloEsFutura(date('Y-m-d', strtotime('+1 day')), '10:00'), "fechaHoraVueloEsFutura() acepta un vuelo futuro");
+$runner->assert(!fechaHoraVueloEsFutura(date('Y-m-d', strtotime('-1 day')), '10:00'), "fechaHoraVueloEsFutura() rechaza un vuelo ya realizado");
+$runner->assert(fechaNacimientoEsValida('1998-05-10'), "fechaNacimientoEsValida() acepta una fecha de nacimiento coherente");
+$runner->assert(!fechaNacimientoEsValida(date('Y-m-d', strtotime('+1 year'))), "fechaNacimientoEsValida() rechaza una fecha de nacimiento futura");
+
+// 4.9 Accesibilidad semántica de tablas: los encabezados declaran su alcance
 $vistasConEncabezadosSinScope = [];
 $iteradorVistas = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator(__DIR__ . '/../app/views', FilesystemIterator::SKIP_DOTS)

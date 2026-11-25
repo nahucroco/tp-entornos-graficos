@@ -27,7 +27,14 @@ $usuario = obtenerUsuario();
 <div class="row g-4">
     <!-- COLUMNA IZQUIERDA: FORMULARIO DE RESERVA -->
     <div class="col-lg-8">
-        <?php if (!usuarioLogueado()): ?>
+        <?php if (!fechaHoraVueloEsFutura($vuelo['fechaSalidaVuelo'], $vuelo['horaSalidaVuelo'])): ?>
+            <div class="card p-4 rounded-4 shadow-sm border-0 bg-white text-center mb-4">
+                <i class="bi bi-calendar-x display-3 text-warning mb-3" aria-hidden="true"></i>
+                <h1 class="h4 fw-bold">Este vuelo ya no está disponible</h1>
+                <p class="text-muted mb-3">La fecha y hora de salida ya pasaron, por lo que no se puede generar una reserva.</p>
+                <a href="index.php?pagina=vuelos" class="btn btn-primary align-self-center">Buscar vuelos disponibles</a>
+            </div>
+        <?php elseif (!usuarioLogueado()): ?>
             <div class="card p-4 rounded-4 shadow-sm border-0 bg-white text-center mb-4">
                 <i class="bi bi-person-lock display-3 text-warning mb-3"></i>
                 <h1 class="h4 fw-bold">Iniciá sesión para continuar con tu reserva</h1>

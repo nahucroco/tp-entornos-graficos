@@ -37,7 +37,8 @@ class Database
                 self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
             } catch (PDOException $e) {
                 error_log("Error de conexión a la BD: " . $e->getMessage());
-                die("Error de conexión con la base de datos: " . $e->getMessage());
+                http_response_code(503);
+                exit('No pudimos conectarnos al servicio en este momento. Por favor, intentá nuevamente más tarde.');
             }
         }
 
