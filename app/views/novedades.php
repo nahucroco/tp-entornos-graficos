@@ -46,6 +46,7 @@ if (!empty($termino)) {
                 <?php foreach ($novedades as $nov): ?>
                     <div class="col-md-6">
                         <article class="card h-100 shadow-sm border p-3 bg-white">
+                            <h3 class="visually-hidden">Novedad #<?= $nov['codNovedad'] ?></h3>
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <span class="badge bg-info text-dark">
                                     <i class="bi bi-megaphone me-1"></i>Comunicado

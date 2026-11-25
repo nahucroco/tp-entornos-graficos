@@ -96,7 +96,7 @@ $aerolineas = obtenerAerolineas();
                         </div>
                         <div class="col-md-6">
                             <label for="reg-tipo" class="form-label small fw-bold">Tipo de Cuenta <span class="text-danger">*</span></label>
-                            <select class="form-select" id="reg-tipo" name="tipo_usuario" required>
+                            <select class="form-select" id="reg-tipo" name="tipo_usuario">
                                 <option value="usuario" selected>Usuario / Pasajero (Cliente)</option>
                                 <option value="ceo de aerolínea">CEO de Aerolínea (Requiere aprobación Admin)</option>
                             </select>
