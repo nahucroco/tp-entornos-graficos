@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $clave = (string)($_POST['clave'] ?? '');
             $confirmar = (string)($_POST['clave_confirm'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
+            $fechaNacimiento = trim($_POST['fecha_nacimiento'] ?? '');
             $tipoUsuario = (string)($_POST['tipo_usuario'] ?? 'usuario');
 
             if (!in_array($tipoUsuario, ['usuario', 'ceo de aerolínea'], true)) {
@@ -90,6 +91,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($nombre) || empty($email) || empty($clave) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['mensaje'] = 'Por favor, completá todos los campos requeridos.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=registro');
+                exit;
+            }
+
+            if ($fechaNacimiento !== '' && !fechaNacimientoEsValida($fechaNacimiento)) {
+                $_SESSION['mensaje'] = 'La fecha de nacimiento debe ser una fecha válida, no futura y de hasta 120 años de antigüedad.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=registro');
+                exit;
+            }
+
+            if (mb_strlen($telefono) > 20) {
+                $_SESSION['mensaje'] = 'El teléfono no puede superar los 20 caracteres. Usá solo el código de área y número de contacto.';
                 $_SESSION['tipo_mensaje'] = 'warning';
                 header('Location: index.php?pagina=registro');
                 exit;
@@ -174,6 +189,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            if (!fechaHoraVueloEsFutura($vuelo['fechaSalidaVuelo'], $vuelo['horaSalidaVuelo'])) {
+                $_SESSION['mensaje'] = 'No es posible reservar este vuelo porque su fecha y hora de salida ya pasaron.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=vuelos');
+                exit;
+            }
+
             $precioFinal = (float)$vuelo['precioVuelo'];
             if ($promoId) {
                 $db = Database::getConnection();
@@ -205,6 +227,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $user = obtenerUsuario();
             $reservaId = (int)($_POST['reserva_id'] ?? 0);
+
+            $reserva = obtenerReservaPorId($reservaId);
+            if (!$reserva || (int)$reserva['codUsuario'] !== (int)$user['id']) {
+                $_SESSION['mensaje'] = 'La reserva seleccionada no existe o no te pertenece.';
+                $_SESSION['tipo_mensaje'] = 'danger';
+                header('Location: index.php?pagina=reservas');
+                exit;
+            }
+
+            if (!fechaHoraVueloEsFutura($reserva['fechaSalidaVuelo'], $reserva['horaSalidaVuelo'])) {
+                $_SESSION['mensaje'] = 'No es posible confirmar el pago porque la fecha y hora de salida del vuelo ya pasaron.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=reservas');
+                exit;
+            }
 
             if (confirmarPagoReserva($reservaId, (int)$user['id'])) {
                 $reservaDetalle = obtenerReservaPorId($reservaId);
@@ -266,6 +303,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $precio = (float)($_POST['precio'] ?? 0);
             $asientos = (int)($_POST['asientos'] ?? 0);
 
+            if (!fechaHoraVueloEsFutura($fecha, $hora)) {
+                $_SESSION['mensaje'] = 'La fecha y hora de salida deben ser posteriores al momento actual.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=ceo_vuelos');
+                exit;
+            }
+
             if (crearVuelo($aeroId, $origen, $destino, $fecha, $hora, $precio, $asientos)) {
                 $_SESSION['mensaje'] = 'Nuevo vuelo programado con éxito.';
                 $_SESSION['tipo_mensaje'] = 'success';
@@ -288,6 +332,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hora = trim($_POST['hora'] ?? '');
             $precio = (float)($_POST['precio'] ?? 0);
             $asientos = (int)($_POST['asientos'] ?? 0);
+
+            if (!fechaHoraVueloEsFutura($fecha, $hora)) {
+                $_SESSION['mensaje'] = 'La fecha y hora de salida deben ser posteriores al momento actual.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=ceo_vuelos');
+                exit;
+            }
 
             if (modificarVuelo($vueloId, $origen, $destino, $fecha, $hora, $precio, $asientos)) {
                 $_SESSION['mensaje'] = 'Vuelo #' . $vueloId . ' modificado correctamente.';

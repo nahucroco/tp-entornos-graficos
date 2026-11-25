@@ -48,7 +48,7 @@ $aerolineas = obtenerAerolineas();
                         </div>
                         <div class="col-md-4">
                             <label for="reg-fecha-nac" class="form-label small fw-bold">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" id="reg-fecha-nac" name="fecha_nacimiento">
+                            <input type="date" class="form-control" id="reg-fecha-nac" name="fecha_nacimiento" max="<?= date('Y-m-d') ?>" min="<?= date('Y-m-d', strtotime('-120 years')) ?>">
                         </div>
                         <div class="col-md-4">
                             <label for="reg-nacionalidad" class="form-label small fw-bold">Nacionalidad</label>
@@ -75,7 +75,7 @@ $aerolineas = obtenerAerolineas();
                         </div>
                         <div class="col-md-6">
                             <label for="reg-celular" class="form-label small fw-bold">Teléfono celular <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="reg-celular" name="telefono" required placeholder="Ej. 341-155000000">
+                            <input type="tel" class="form-control" id="reg-celular" name="telefono" maxlength="20" required placeholder="Ej. 341-155000000">
                         </div>
                         <div class="col-12">
                             <label for="reg-direccion" class="form-label small fw-bold">Dirección de residencia</label>

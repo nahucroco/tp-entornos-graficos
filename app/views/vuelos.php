@@ -44,7 +44,7 @@ $aerolineas = obtenerAerolineas();
         </div>
         <div class="col-md-2">
             <label class="form-label small fw-bold text-muted mb-0" for="filtro-fecha">Fecha</label>
-            <input type="date" class="form-control form-control-sm" id="filtro-fecha" name="fecha" value="<?= htmlspecialchars($filtroFecha) ?>">
+            <input type="date" class="form-control form-control-sm" id="filtro-fecha" name="fecha" min="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($filtroFecha) ?>">
         </div>
         <div class="col-md-2">
             <label class="form-label small fw-bold text-muted mb-0" for="filtro-orden">Ordenar por</label>
