@@ -44,8 +44,8 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $aeroEditar ? 'modificar_aerolinea' : 'crear_aerolinea' ?>
-            <?= campoCsrf() ?>">
+            <input type="hidden" name="accion" value="<?= $aeroEditar ? 'modificar_aerolinea' : 'crear_aerolinea' ?>">
+            <?= campoCsrf() ?>
             <?php if ($aeroEditar): ?>
                 <input type="hidden" name="aerolinea_id" value="<?= $aeroEditar['codAerolinea'] ?>">
             <?php endif; ?>

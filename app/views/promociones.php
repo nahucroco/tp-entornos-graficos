@@ -8,10 +8,13 @@ $usuario = obtenerUsuario();
 $termino = trim($_GET['buscar'] ?? '');
 
 if (!empty($termino)) {
-    $promociones = array_filter($promociones, function($p) use ($termino) {
-        return stripos($p['descripcionPromocion'], $termino) !== false 
+    $terminoSinPorc = rtrim($termino, '% ');
+    $promociones = array_filter($promociones, function($p) use ($termino, $terminoSinPorc) {
+        return stripos($p['descripcionPromocion'], $termino) !== false
             || stripos($p['nombreAerolinea'], $termino) !== false
-            || stripos((string)$p['codPromocion'], $termino) !== false;
+            || stripos((string)($p['codigoIATA'] ?? ''), $termino) !== false
+            || stripos((string)$p['codPromocion'], $termino) !== false
+            || ($terminoSinPorc !== '' && stripos((string)$p['descuentoPromocion'], $terminoSinPorc) !== false);
     });
 }
 ?>
@@ -35,10 +38,16 @@ if (!empty($termino)) {
                 <p class="text-muted small mb-0">Descuentos comerciales aprobados por la administración para viajar barato.</p>
             </div>
             
-            <form method="get" action="index.php" class="d-flex gap-2">
+            <form method="get" action="index.php" class="d-flex flex-column align-items-md-end gap-1">
                 <input type="hidden" name="pagina" value="promociones">
-                <input type="text" name="buscar" class="form-control form-control-sm" placeholder="Buscar promoción..." value="<?= htmlspecialchars($termino) ?>">
-                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>
+                <div class="d-flex gap-2">
+                    <input type="text" name="buscar" class="form-control form-control-sm" style="min-width: 240px;" placeholder="Descripción, aerolínea, IATA, % o #código" aria-label="Buscar promoción por descripción, aerolínea, código IATA, porcentaje o número" value="<?= htmlspecialchars($termino) ?>">
+                    <button type="submit" class="btn btn-sm btn-outline-primary" aria-label="Buscar"><i class="bi bi-search"></i></button>
+                    <?php if ($termino !== ''): ?>
+                        <a href="index.php?pagina=promociones" class="btn btn-sm btn-outline-secondary" title="Limpiar búsqueda">Limpiar</a>
+                    <?php endif; ?>
+                </div>
+                <span class="text-muted" style="font-size: 0.72rem;">Filtra por descripción, aerolínea, IATA, descuento (%) o #código.</span>
             </form>
         </div>
 

@@ -47,8 +47,8 @@ if ($editarId) {
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $novedadEditar ? 'modificar_novedad' : 'crear_novedad' ?>
-            <?= campoCsrf() ?>">
+            <input type="hidden" name="accion" value="<?= $novedadEditar ? 'modificar_novedad' : 'crear_novedad' ?>">
+            <?= campoCsrf() ?>
             <?php if ($novedadEditar): ?>
                 <input type="hidden" name="novedad_id" value="<?= $novedadEditar['codNovedad'] ?>">
             <?php endif; ?>

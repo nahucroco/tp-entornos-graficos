@@ -7,6 +7,14 @@ declare(strict_types=1);
  * y emulación transparente de contingencia para evaluación académica.
  */
 
+function smtpConfigurado(): bool
+{
+    $smtpHost = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? '');
+    $smtpUser = getenv('SMTP_USER') ?: ($_ENV['SMTP_USER'] ?? '');
+    $smtpPass = getenv('SMTP_PASS') ?: ($_ENV['SMTP_PASS'] ?? '');
+    return !empty($smtpHost) && !empty($smtpUser) && !empty($smtpPass);
+}
+
 function enviarCorreo(
     string $destinatarioEmail,
     string $destinatarioNombre,

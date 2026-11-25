@@ -41,6 +41,9 @@ $vueloId = (int)($_GET['vuelo'] ?? 0);
                     <div class="input-group mt-1">
                         <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
                         <input type="password" class="form-control" id="login-clave" name="clave" required placeholder="••••••••">
+                        <button class="btn btn-outline-secondary" type="button" data-toggle-password="login-clave" aria-label="Mostrar contraseña" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
 

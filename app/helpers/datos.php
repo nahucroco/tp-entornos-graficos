@@ -301,12 +301,63 @@ function contarTotalReservasPorUsuario(int $codUsuario, ?string $estado = null):
     }
 }
 
+/**
+ * Marca como 'cancelada' las reservas 'pendiente de pago' cuyo vuelo ya partió
+ * y libera los asientos correspondientes.
+ */
+function expirarReservasVencidas(?int $codUsuario = null): int
+{
+    try {
+        $db = Database::getConnection();
+        $db->beginTransaction();
+
+        $sql = "SELECT r.codReserva, r.codVuelo
+                FROM reservas r
+                INNER JOIN vuelos v ON r.codVuelo = v.codVuelo
+                WHERE r.estadoReserva = 'pendiente de pago'
+                  AND TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) <= NOW()";
+        $params = [];
+        if ($codUsuario !== null) {
+            $sql .= " AND r.codUsuario = ?";
+            $params[] = $codUsuario;
+        }
+        $sql .= " FOR UPDATE";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $vencidas = $stmt->fetchAll();
+
+        if (empty($vencidas)) {
+            $db->commit();
+            return 0;
+        }
+
+        $updRes = $db->prepare("UPDATE reservas SET estadoReserva = 'cancelada' WHERE codReserva = ?");
+        $updVuelo = $db->prepare("UPDATE vuelos SET asientosDisponibles = asientosDisponibles + 1 WHERE codVuelo = ?");
+
+        foreach ($vencidas as $v) {
+            $updRes->execute([(int)$v['codReserva']]);
+            $updVuelo->execute([(int)$v['codVuelo']]);
+        }
+
+        $db->commit();
+        return count($vencidas);
+    } catch (Throwable $e) {
+        if (isset($db) && $db->inTransaction()) {
+            $db->rollBack();
+        }
+        error_log("Error al expirar reservas vencidas: " . $e->getMessage());
+        return 0;
+    }
+}
+
 function obtenerReservasPorUsuario(
     int $codUsuario,
     ?string $estado = null,
     ?int $limite = null,
     int $offset = 0
 ): array {
+    expirarReservasVencidas($codUsuario);
     try {
         $db = Database::getConnection();
         $sql = "SELECT r.*, v.origenVuelo, v.destinoVuelo, v.fechaSalidaVuelo, v.horaSalidaVuelo, v.precioVuelo,
@@ -355,6 +406,15 @@ function obtenerReservaPorId(int $codReserva): ?array
         $stmt = $db->prepare($sql);
         $stmt->execute([$codReserva]);
         $res = $stmt->fetch();
+        if ($res && $res['estadoReserva'] === 'pendiente de pago') {
+            $tsVuelo = strtotime($res['fechaSalidaVuelo'] . ' ' . $res['horaSalidaVuelo']);
+            if ($tsVuelo !== false && $tsVuelo <= time()) {
+                if (expirarReservasVencidas((int)$res['codUsuario']) > 0) {
+                    $stmt->execute([$codReserva]);
+                    $res = $stmt->fetch();
+                }
+            }
+        }
         return $res ?: null;
     } catch (Throwable $e) {
         error_log("Error al obtener reserva: " . $e->getMessage());
@@ -408,9 +468,13 @@ function crearReserva(int $codUsuario, int $codVuelo, ?int $codPromocion, float 
 function confirmarPagoReserva(int $codReserva, int $codUsuario): bool
 {
     try {
+        expirarReservasVencidas($codUsuario);
         $db = Database::getConnection();
-        $stmt = $db->prepare("UPDATE reservas SET estadoReserva = 'confirmada'
-                              WHERE codReserva = ? AND codUsuario = ? AND estadoReserva = 'pendiente de pago'");
+        $stmt = $db->prepare("UPDATE reservas r
+                              INNER JOIN vuelos v ON r.codVuelo = v.codVuelo
+                              SET r.estadoReserva = 'confirmada'
+                              WHERE r.codReserva = ? AND r.codUsuario = ? AND r.estadoReserva = 'pendiente de pago'
+                                AND TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()");
         return $stmt->execute([$codReserva, $codUsuario]) && $stmt->rowCount() > 0;
     } catch (Throwable $e) {
         error_log("Error al confirmar pago: " . $e->getMessage());

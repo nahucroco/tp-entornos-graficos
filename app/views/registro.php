@@ -103,11 +103,21 @@ $aerolineas = obtenerAerolineas();
                         </div>
                         <div class="col-md-6">
                             <label for="reg-clave" class="form-label small fw-bold">Contraseña <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="reg-clave" name="clave" minlength="6" required placeholder="Mínimo 6 caracteres">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="reg-clave" name="clave" minlength="6" required placeholder="Mínimo 6 caracteres">
+                                <button class="btn btn-outline-secondary" type="button" data-toggle-password="reg-clave" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="reg-clave2" class="form-label small fw-bold">Confirmar Contraseña <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="reg-clave2" name="clave_confirm" minlength="6" required placeholder="Repetí tu contraseña">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="reg-clave2" name="clave_confirm" minlength="6" required placeholder="Repetí tu contraseña">
+                                <button class="btn btn-outline-secondary" type="button" data-toggle-password="reg-clave2" aria-label="Mostrar confirmación de contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </fieldset>

@@ -145,9 +145,13 @@ $novedades = obtenerNovedadesVigentes();
         <div class="card p-3 rounded-4 shadow-sm border-0 bg-white mb-3">
             <h2 class="h6 fw-bold mb-2"><i class="bi bi-shield-check text-success me-2"></i>Estado de la Reserva</h2>
             <p class="small text-muted mb-2">
-                <?= $reserva['estadoReserva'] === 'confirmada' 
-                    ? 'Esta reserva ya fue abonada y se encuentra confirmada como pasaje electrónico emitido.'
-                    : 'Esta reserva se encuentra pendiente de pago. Recordá abonarla para asegurar tu viaje.' ?>
+                <?php if ($reserva['estadoReserva'] === 'confirmada'): ?>
+                    Esta reserva ya fue abonada y se encuentra confirmada como pasaje electrónico emitido.
+                <?php elseif ($reserva['estadoReserva'] === 'cancelada'): ?>
+                    Esta reserva se encuentra cancelada (o venció antes de confirmarse el pago) y no es válida para viajar.
+                <?php else: ?>
+                    Esta reserva se encuentra pendiente de pago. Recordá abonarla antes de la salida del vuelo para asegurar tu viaje.
+                <?php endif; ?>
             </p>
             <div class="p-2 bg-light rounded small text-center">
                 Código localizador: <strong class="text-primary">AR-<?= str_pad((string)$reserva['codReserva'], 6, '0', STR_PAD_LEFT) ?></strong>

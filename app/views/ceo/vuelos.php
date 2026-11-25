@@ -51,8 +51,8 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
         </h2>
 
         <form method="post" action="index.php" class="needs-validation" novalidate data-validar>
-            <input type="hidden" name="accion" value="<?= $vueloEditar ? 'modificar_vuelo' : 'crear_vuelo' ?>
-            <?= campoCsrf() ?>">
+            <input type="hidden" name="accion" value="<?= $vueloEditar ? 'modificar_vuelo' : 'crear_vuelo' ?>">
+            <?= campoCsrf() ?>
             <?php if ($vueloEditar): ?>
                 <input type="hidden" name="vuelo_id" value="<?= $vueloEditar['codVuelo'] ?>">
             <?php endif; ?>

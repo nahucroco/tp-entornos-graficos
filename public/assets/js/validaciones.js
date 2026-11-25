@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const total = Math.max(0, precioBase - montoDescuento);
 
             if (displayDescuento) {
-                displayDescuento.textContent = montoDescuento > 0 
+                displayDescuento.textContent = montoDescuento > 0
                     ? `-$${montoDescuento.toLocaleString('es-AR', { minimumFractionDigits: 2 })} (${porcentaje}%)`
                     : '$0,00';
             }
@@ -55,4 +55,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    // 4. Botón mostrar/ocultar contraseña
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-toggle-password');
+            const input = targetId ? document.getElementById(targetId) : null;
+            if (!input) return;
+
+            const mostrar = input.type === 'password';
+            input.type = mostrar ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
+            btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('bi-eye', !mostrar);
+                icon.classList.toggle('bi-eye-slash', mostrar);
+            }
+        });
+    });
 });

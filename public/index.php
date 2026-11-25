@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // --- AUTENTICACIÓN Y CUENTAS ---
         case 'login_credenciales':
             $email = trim($_POST['email'] ?? '');
-            $clave = trim($_POST['clave'] ?? '');
+            $clave = (string)($_POST['clave'] ?? '');
             $user = autenticarUsuario($email, $clave);
 
             if ($user) {
@@ -105,7 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $res = registrarUsuario($nombre, $email, $clave, $telefono, $tipoUsuario);
             if ($res['ok']) {
                 enviarMailBienvenida($email, $nombre);
-                $_SESSION['mensaje'] = $res['mensaje'] . ' Te enviamos un correo de bienvenida.';
+                $avisoCorreo = smtpConfigurado()
+                    ? ' Te enviamos un correo de bienvenida.'
+                    : ($tipoUsuario === 'usuario' ? ' Tu cuenta ya está activa y no requiere validación por correo.' : '');
+                $_SESSION['mensaje'] = $res['mensaje'] . $avisoCorreo;
                 $_SESSION['tipo_mensaje'] = 'success';
                 header('Location: index.php?pagina=login');
                 exit;
@@ -216,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: index.php?pagina=reserva_detalle&id=' . $reservaId);
                 exit;
             } else {
-                $_SESSION['mensaje'] = 'No se pudo procesar el pago de la reserva.';
+                $_SESSION['mensaje'] = 'No se pudo procesar el pago: la reserva ya fue confirmada, cancelada o el vuelo ya partió.';
                 $_SESSION['tipo_mensaje'] = 'danger';
                 header('Location: index.php?pagina=reservas');
                 exit;

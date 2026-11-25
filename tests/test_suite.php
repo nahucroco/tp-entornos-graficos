@@ -301,10 +301,11 @@ $runner->assert(count($todasPromos) >= count($promosAprobadas), "obtenerTodasPro
 $novedadesVigentes = obtenerNovedadesVigentes();
 $runner->assert(!empty($novedadesVigentes), "obtenerNovedadesVigentes() retorna novedades vigentes (Total: " . count($novedadesVigentes) . ")");
 
-// 4.5 Transacción de Reserva y Decremento de Cupos
-$vueloTest = $vuelosPaginados[0] ?? null;
-if ($vueloTest) {
-    $vId = (int)$vueloTest['codVuelo'];
+// 4.5 Transacción de Reserva y Decremento de Cupos (vuelo futuro garantizado)
+$db->query("INSERT INTO vuelos (codAerolinea, origenVuelo, destinoVuelo, fechaSalidaVuelo, horaSalidaVuelo, precioVuelo, asientosDisponibles)
+            VALUES (1, 'Test EZE', 'Test MDZ', DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY), '14:00:00', 45000.00, 15)");
+$vId = (int)$db->lastInsertId();
+if ($vId > 0) {
     $asientosAntes = (int)$db->query("SELECT asientosDisponibles FROM vuelos WHERE codVuelo = {$vId}")->fetchColumn();
 
     // Crear reserva de prueba para Mariana
@@ -322,7 +323,25 @@ if ($vueloTest) {
 
     $estadoFinal = $db->query("SELECT estadoReserva FROM reservas WHERE codReserva = {$resId}")->fetchColumn();
     $runner->assertEqual('confirmada', $estadoFinal, "Estado de la reserva en base de datos quedó en 'confirmada'");
+
+    // Limpiar datos temporales
+    $db->query("DELETE FROM reservas WHERE codReserva = {$resId}");
+    $db->query("DELETE FROM vuelos WHERE codVuelo = {$vId}");
 }
+
+// 4.5b Reserva pendiente de pago en vuelo ya pasado expira automáticamente y no permite pago
+$db->query("INSERT INTO vuelos (codAerolinea, origenVuelo, destinoVuelo, fechaSalidaVuelo, horaSalidaVuelo, precioVuelo, asientosDisponibles)
+            VALUES (1, 'Test Pasado', 'Test BUE', DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY), '10:00:00', 30000.00, 10)");
+$vueloPasadoId = (int)$db->lastInsertId();
+$resPasadaId = crearReserva($marianaId, $vueloPasadoId, null, 30000.00);
+$pagoPasadoOk = confirmarPagoReserva($resPasadaId, $marianaId);
+$runner->assert($pagoPasadoOk === false, "confirmarPagoReserva() rechaza el pago si el vuelo ya pasó");
+$estadoPasada = $db->query("SELECT estadoReserva FROM reservas WHERE codReserva = {$resPasadaId}")->fetchColumn();
+$runner->assertEqual('cancelada', $estadoPasada, "Reserva impaga de vuelo pasado expira a 'cancelada'");
+$asientosPasado = (int)$db->query("SELECT asientosDisponibles FROM vuelos WHERE codVuelo = {$vueloPasadoId}")->fetchColumn();
+$runner->assertEqual(10, $asientosPasado, "Reserva expirada libera el asiento disponible en el vuelo");
+$db->query("DELETE FROM reservas WHERE codReserva = {$resPasadaId}");
+$db->query("DELETE FROM vuelos WHERE codVuelo = {$vueloPasadoId}");
 
 // 4.6 Regla de Negocio #13: Cancelación de Reservas y Regla de las 72 Horas
 // Creamos un vuelo lejano (a 10 días) para probar cancelación exitosa
