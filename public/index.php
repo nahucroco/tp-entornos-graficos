@@ -376,6 +376,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inicio = trim($_POST['fecha_inicio'] ?? '') ?: null;
             $fin = trim($_POST['fecha_fin'] ?? '') ?: null;
 
+            if ($descuento <= 0 || $descuento > 100) {
+                $_SESSION['mensaje'] = 'El porcentaje de descuento debe estar entre 1% y 100%.';
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=ceo_promociones');
+                exit;
+            }
+
+            if (($errorFechas = validarRangoFechas($inicio, $fin)) !== null) {
+                $_SESSION['mensaje'] = $errorFechas;
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=ceo_promociones');
+                exit;
+            }
+
             if (crearPromocion($aeroId, $desc, $descuento, $inicio, $fin)) {
                 $_SESSION['mensaje'] = 'Promoción remitida para revisión. Quedará activa una vez aprobada por la cátedra/administrador.';
                 $_SESSION['tipo_mensaje'] = 'info';
@@ -478,6 +492,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fPub = trim($_POST['fecha_publicacion'] ?? date('Y-m-d'));
             $fExp = trim($_POST['fecha_expiracion'] ?? date('Y-m-d', strtotime('+30 days')));
 
+            if (($errorFechas = validarRangoFechas($fPub, $fExp)) !== null) {
+                $_SESSION['mensaje'] = $errorFechas;
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=admin_novedades');
+                exit;
+            }
+
             if (crearNovedad((int)$user['id'], $texto, $fPub, $fExp)) {
                 $_SESSION['mensaje'] = 'Comunicado oficial publicado con éxito.';
                 $_SESSION['tipo_mensaje'] = 'success';
@@ -497,6 +518,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $texto = trim($_POST['texto'] ?? '');
             $fPub = trim($_POST['fecha_publicacion'] ?? date('Y-m-d'));
             $fExp = trim($_POST['fecha_expiracion'] ?? date('Y-m-d', strtotime('+30 days')));
+
+            if (($errorFechas = validarRangoFechas($fPub, $fExp)) !== null) {
+                $_SESSION['mensaje'] = $errorFechas;
+                $_SESSION['tipo_mensaje'] = 'warning';
+                header('Location: index.php?pagina=admin_novedades&editar=' . $novId);
+                exit;
+            }
 
             if (modificarNovedad($novId, $texto, $fPub, $fExp)) {
                 $_SESSION['mensaje'] = 'Comunicado #' . $novId . ' modificado.';

@@ -47,6 +47,44 @@ function fechaNacimientoEsValida(string $fechaNacimiento): bool
     return $fecha <= $hoy && $fecha >= $hoy->modify('-120 years');
 }
 
+/**
+ * Valida coherencia de un rango de fechas (Y-m-d). Devuelve null si es válido o mensaje de error.
+ */
+function validarRangoFechas(?string $inicio, ?string $fin, bool $exigirFinNoPasado = true): ?string
+{
+    $parse = static function (?string $valor): ?DateTimeImmutable {
+        if ($valor === null || $valor === '') {
+            return null;
+        }
+        $dt = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+        $err = DateTimeImmutable::getLastErrors();
+        if ($dt === false || ($err !== false && ($err['warning_count'] > 0 || $err['error_count'] > 0))) {
+            return null;
+        }
+        return $dt;
+    };
+
+    $dtInicio = $parse($inicio);
+    if ($inicio !== null && $inicio !== '' && $dtInicio === null) {
+        return 'La fecha de inicio ingresada no es válida.';
+    }
+
+    $dtFin = $parse($fin);
+    if ($fin !== null && $fin !== '' && $dtFin === null) {
+        return 'La fecha de fin/expiración ingresada no es válida.';
+    }
+
+    if ($dtInicio !== null && $dtFin !== null && $dtFin < $dtInicio) {
+        return 'La fecha de finalización no puede ser anterior a la fecha de inicio.';
+    }
+
+    if ($exigirFinNoPasado && $dtFin !== null && $dtFin < new DateTimeImmutable('today')) {
+        return 'La fecha de finalización no puede estar en el pasado.';
+    }
+
+    return null;
+}
+
 function contarTotalVuelos(
     ?string $origen = null,
     ?string $destino = null,
