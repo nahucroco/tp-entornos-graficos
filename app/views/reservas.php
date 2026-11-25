@@ -43,6 +43,7 @@ $novedades = obtenerNovedadesVigentes();
                         $tsVuelo = strtotime($res['fechaSalidaVuelo'] . ' ' . $res['horaSalidaVuelo']);
                         $horasParaVuelo = ($tsVuelo - time()) / 3600;
                         $puedeCancelar = $horasParaVuelo >= 72;
+                        $puedePagar = $tsVuelo > time();
                     ?>
                     <article class="card shadow-sm border-0 rounded-4 p-4 bg-white">
                         <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
@@ -102,14 +103,20 @@ $novedades = obtenerNovedadesVigentes();
                                 </form>
 
                                 <!-- Botón Confirmar Pago -->
-                                <form method="post" action="index.php">
-                                    <input type="hidden" name="accion" value="pagar_reserva">
-            <?= campoCsrf() ?>
-                                    <input type="hidden" name="reserva_id" value="<?= $res['codReserva'] ?>">
-                                    <button type="submit" class="btn btn-despegar btn-sm">
-                                        <i class="bi bi-credit-card-2-front me-1"></i>Confirmar Pago
+                                <?php if ($puedePagar): ?>
+                                    <form method="post" action="index.php">
+                                        <input type="hidden" name="accion" value="pagar_reserva">
+                                        <?= campoCsrf() ?>
+                                        <input type="hidden" name="reserva_id" value="<?= $res['codReserva'] ?>">
+                                        <button type="submit" class="btn btn-despegar btn-sm">
+                                            <i class="bi bi-credit-card-2-front me-1"></i>Confirmar pago
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="La fecha de salida del vuelo ya pasó">
+                                        <i class="bi bi-calendar-x me-1"></i>Vuelo vencido
                                     </button>
-                                </form>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </article>

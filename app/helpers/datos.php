@@ -12,6 +12,41 @@ require_once __DIR__ . '/paginador.php';
 // VUELOS
 // ==========================================
 
+/**
+ * Indica si un vuelo todavía no partió.
+ */
+function fechaHoraVueloEsFutura(string $fecha, string $hora): bool
+{
+    if (preg_match('/^\d{2}:\d{2}$/', $hora)) {
+        $hora .= ':00';
+    }
+
+    $salida = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', $fecha . ' ' . $hora);
+    $errores = DateTimeImmutable::getLastErrors();
+
+    if ($salida === false || ($errores !== false && ($errores['warning_count'] > 0 || $errores['error_count'] > 0))) {
+        return false;
+    }
+
+    return $salida > new DateTimeImmutable('now');
+}
+
+/**
+ * La fecha de nacimiento debe ser real, no futura y razonable.
+ */
+function fechaNacimientoEsValida(string $fechaNacimiento): bool
+{
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaNacimiento);
+    $errores = DateTimeImmutable::getLastErrors();
+
+    if ($fecha === false || ($errores !== false && ($errores['warning_count'] > 0 || $errores['error_count'] > 0))) {
+        return false;
+    }
+
+    $hoy = new DateTimeImmutable('today');
+    return $fecha <= $hoy && $fecha >= $hoy->modify('-120 years');
+}
+
 function contarTotalVuelos(
     ?string $origen = null,
     ?string $destino = null,
@@ -23,7 +58,7 @@ function contarTotalVuelos(
         $db = Database::getConnection();
         $sql = "SELECT COUNT(*) FROM vuelos v
                 INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
-                WHERE 1=1";
+                WHERE TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()";
         $params = [];
 
         if (!empty($origen)) {
@@ -75,7 +110,7 @@ function obtenerVuelos(
         $sql = "SELECT v.*, a.nombreAerolinea, a.codigoIATA, a.codPais
                 FROM vuelos v
                 INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
-                WHERE 1=1";
+                WHERE TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()";
         $params = [];
 
         if (!empty($origen)) {
@@ -431,12 +466,14 @@ function crearReserva(int $codUsuario, int $codVuelo, ?int $codPromocion, float 
         $db = Database::getConnection();
         $db->beginTransaction();
 
-        // 1. Verificar cupos disponibles
-        $stmt = $db->prepare("SELECT asientosDisponibles FROM vuelos WHERE codVuelo = ? FOR UPDATE");
+        // 1. Verificar cupos y que el vuelo todavía no haya partido.
+        $stmt = $db->prepare("SELECT asientosDisponibles, fechaSalidaVuelo, horaSalidaVuelo
+                              FROM vuelos WHERE codVuelo = ? FOR UPDATE");
         $stmt->execute([$codVuelo]);
-        $asientos = (int) $stmt->fetchColumn();
+        $vuelo = $stmt->fetch();
+        $asientos = (int)($vuelo['asientosDisponibles'] ?? 0);
 
-        if ($asientos <= 0) {
+        if (!$vuelo || $asientos <= 0 || !fechaHoraVueloEsFutura($vuelo['fechaSalidaVuelo'], $vuelo['horaSalidaVuelo'])) {
             $db->rollBack();
             return null; // Sin cupo
         }
@@ -473,7 +510,9 @@ function confirmarPagoReserva(int $codReserva, int $codUsuario): bool
         $stmt = $db->prepare("UPDATE reservas r
                               INNER JOIN vuelos v ON r.codVuelo = v.codVuelo
                               SET r.estadoReserva = 'confirmada'
-                              WHERE r.codReserva = ? AND r.codUsuario = ? AND r.estadoReserva = 'pendiente de pago'
+                              WHERE r.codReserva = ?
+                                AND r.codUsuario = ?
+                                AND r.estadoReserva = 'pendiente de pago'
                                 AND TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()");
         return $stmt->execute([$codReserva, $codUsuario]) && $stmt->rowCount() > 0;
     } catch (Throwable $e) {
@@ -806,7 +845,7 @@ function registrarUsuario(string $nombre, string $email, string $clave, string $
         ];
     } catch (Throwable $e) {
         error_log("Error al registrar usuario: " . $e->getMessage());
-        return ['ok' => false, 'mensaje' => 'Error al crear la cuenta: ' . $e->getMessage()];
+        return ['ok' => false, 'mensaje' => 'No se pudo crear la cuenta en este momento. Verificá los datos ingresados e intentá nuevamente.'];
     }
 }
 
@@ -875,7 +914,7 @@ function eliminarAerolinea(int $id): array
         return ['ok' => true, 'mensaje' => 'Aerolínea eliminada correctamente.'];
     } catch (Throwable $e) {
         error_log("Error al eliminar aerolínea: " . $e->getMessage());
-        return ['ok' => false, 'mensaje' => 'Error al eliminar aerolínea: ' . $e->getMessage()];
+        return ['ok' => false, 'mensaje' => 'No se pudo eliminar la aerolínea en este momento. Intentá nuevamente más tarde.'];
     }
 }
 
@@ -919,7 +958,7 @@ function eliminarVuelo(int $id): array
         return ['ok' => true, 'mensaje' => 'Vuelo eliminado correctamente del sistema.'];
     } catch (Throwable $e) {
         error_log("Error al eliminar vuelo: " . $e->getMessage());
-        return ['ok' => false, 'mensaje' => 'Error al eliminar vuelo: ' . $e->getMessage()];
+        return ['ok' => false, 'mensaje' => 'No se pudo eliminar el vuelo en este momento. Intentá nuevamente más tarde.'];
     }
 }
 

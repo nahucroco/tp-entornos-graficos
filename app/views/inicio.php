@@ -87,7 +87,7 @@ $aerolineas = obtenerAerolineas();
                 <label class="form-label small fw-bold text-muted mb-1" for="hero-fecha">
                     <i class="bi bi-calendar-event me-1 text-primary"></i>Fecha ida
                 </label>
-                <input type="date" class="form-control" id="hero-fecha" name="fecha" value="<?= date('Y-m-d', strtotime('+3 days')) ?>">
+                <input type="date" class="form-control" id="hero-fecha" name="fecha" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+3 days')) ?>">
             </div>
 
             <!-- Pasajeros -->

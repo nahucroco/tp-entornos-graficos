@@ -69,7 +69,7 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
                 </div>
                 <div class="col-md-3">
                     <label for="v-fecha" class="form-label small fw-bold">Fecha de Salida <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="v-fecha" name="fecha" value="<?= htmlspecialchars($vueloEditar['fechaSalidaVuelo'] ?? date('Y-m-d', strtotime('+3 days'))) ?>" required>
+                    <input type="date" class="form-control" id="v-fecha" name="fecha" min="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($vueloEditar['fechaSalidaVuelo'] ?? date('Y-m-d', strtotime('+3 days'))) ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label for="v-hora" class="form-label small fw-bold">Hora de Salida <span class="text-danger">*</span></label>

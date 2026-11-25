@@ -13,6 +13,7 @@ if (!$vuelo) {
 
 $promociones = obtenerPromocionesPorAerolinea((int)$vuelo['codAerolinea']);
 $asientos = (int)$vuelo['asientosDisponibles'];
+$vueloDisponible = fechaHoraVueloEsFutura($vuelo['fechaSalidaVuelo'], $vuelo['horaSalidaVuelo']);
 ?>
 
 <nav class="breadcrumb-condor" aria-label="Ruta de navegación">
@@ -125,7 +126,10 @@ $asientos = (int)$vuelo['asientosDisponibles'];
                 </div>
             <?php endif; ?>
 
-            <?php if ($asientos > 0): ?>
+            <?php if (!$vueloDisponible): ?>
+                <button class="btn btn-secondary btn-lg w-100 mb-2" disabled>Vuelo no disponible</button>
+                <p class="small text-muted text-center">La fecha y hora de salida ya pasaron.</p>
+            <?php elseif ($asientos > 0): ?>
                 <a href="index.php?pagina=reservar&vuelo=<?= $vuelo['codVuelo'] ?>" class="btn btn-despegar btn-lg w-100 mb-2">
                     Continuar reserva
                 </a>
