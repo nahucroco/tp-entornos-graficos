@@ -412,7 +412,7 @@ foreach ($iteradorVistas as $archivoVista) {
     }
 
     $contenidoVista = file_get_contents($archivoVista->getPathname());
-    if (preg_match('/<th(?![^>]*\\bscope=)/', $contenidoVista)) {
+    if (preg_match('/<th(?![a-zA-Z])(?![^>]*\bscope=)/', $contenidoVista)) {
         $vistasConEncabezadosSinScope[] = $archivoVista->getFilename();
     }
 }
