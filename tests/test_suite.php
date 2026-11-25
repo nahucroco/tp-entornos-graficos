@@ -333,7 +333,13 @@ if ($vId > 0) {
 $db->query("INSERT INTO vuelos (codAerolinea, origenVuelo, destinoVuelo, fechaSalidaVuelo, horaSalidaVuelo, precioVuelo, asientosDisponibles)
             VALUES (1, 'Test Pasado', 'Test BUE', DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY), '10:00:00', 30000.00, 10)");
 $vueloPasadoId = (int)$db->lastInsertId();
-$resPasadaId = crearReserva($marianaId, $vueloPasadoId, null, 30000.00);
+$runner->assert(crearReserva($marianaId, $vueloPasadoId, null, 30000.00) === null, "crearReserva() rechaza crear reserva en vuelo ya pasado");
+// Simular una reserva creada antes de que el vuelo partiera (asiento ya descontado: 9 disponibles)
+$db->query("UPDATE vuelos SET asientosDisponibles = 9 WHERE codVuelo = {$vueloPasadoId}");
+$db->prepare("INSERT INTO reservas (codUsuario, codVuelo, codPromocion, fechaReserva, precioFinal, estadoReserva)
+              VALUES (?, ?, NULL, DATE_SUB(NOW(), INTERVAL 5 DAY), 30000.00, 'pendiente de pago')")
+   ->execute([$marianaId, $vueloPasadoId]);
+$resPasadaId = (int)$db->lastInsertId();
 $pagoPasadoOk = confirmarPagoReserva($resPasadaId, $marianaId);
 $runner->assert($pagoPasadoOk === false, "confirmarPagoReserva() rechaza el pago si el vuelo ya pasó");
 $estadoPasada = $db->query("SELECT estadoReserva FROM reservas WHERE codReserva = {$resPasadaId}")->fetchColumn();
