@@ -2,6 +2,10 @@
 
 Trabajo Práctico Integrador para la cátedra de **Entornos Gráficos (2026)** - Universidad Tecnológica Nacional (UTN FRRo).
 
+**Integrantes:** Alfaro, Bautista (47881) · Crocombette, Nahuel (49720) · Franco, Natalia (48952)
+
+**Checklist Oficial de la Cátedra:** [`docs/Checklist_Condor_Alfaro_Crocombette_Franco.md`](docs/Checklist_Condor_Alfaro_Crocombette_Franco.md)
+
 Sistema integral de búsqueda, reserva y gestión aerocomercial inspirado en plataformas líderes de la industria (estilo Despegar.com), desarrollado bajo una arquitectura limpia en **PHP 8.3 puro**, base de datos distribuida **TiDB Cloud (MySQL 8+ compatible)** con cifrado SSL, y frontend responsivo y accesible con **Bootstrap 5.3**.
 
 ---
