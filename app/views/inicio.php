@@ -51,7 +51,8 @@ $aerolineas = obtenerAerolineas();
                     <i class="bi bi-geo-alt me-1 text-primary"></i>Origen
                 </label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="hero-origen" name="origen" placeholder="Ej. Rosario (ROS)" list="lista-origenes" required>
+                    <input type="text" class="form-control" id="hero-origen" name="origen" placeholder="Ej. Rosario (ROS)" list="lista-origenes" required aria-describedby="error-origen">
+                    <div id="error-origen" class="invalid-feedback">Ingresá la ciudad de origen.</div>
                     <datalist id="lista-origenes">
                         <option value="Rosario (ROS)">
                         <option value="Buenos Aires (AEP)">
@@ -69,7 +70,8 @@ $aerolineas = obtenerAerolineas();
                     <i class="bi bi-geo-alt-fill me-1 text-danger"></i>Destino
                 </label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="hero-destino" name="destino" placeholder="Ej. Bariloche (BRC)" list="lista-destinos" required>
+                    <input type="text" class="form-control" id="hero-destino" name="destino" placeholder="Ej. Bariloche (BRC)" list="lista-destinos" required aria-describedby="error-destino">
+                    <div id="error-destino" class="invalid-feedback">Ingresá la ciudad de destino.</div>
                     <datalist id="lista-destinos">
                         <option value="Buenos Aires (AEP)">
                         <option value="Bariloche (BRC)">
