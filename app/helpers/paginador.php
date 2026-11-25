@@ -29,7 +29,7 @@ function renderizarPaginador(
         $html .= '<a class="page-link" href="' . htmlspecialchars($construirUrl($paginaActual - 1)) . '" aria-label="Página anterior">&laquo; Anterior</a>';
         $html .= '</li>';
     } else {
-        $html .= '<li class="page-item disabled"><span class="page-link" aria-disabled="true">&laquo; Anterior</span></li>';
+        $html .= '<li class="page-item disabled"><span class="page-link">&laquo; Anterior</span></li>';
     }
 
     // Ventana deslizante de números
@@ -65,7 +65,7 @@ function renderizarPaginador(
         $html .= '<a class="page-link" href="' . htmlspecialchars($construirUrl($paginaActual + 1)) . '" aria-label="Página siguiente">Siguiente &raquo;</a>';
         $html .= '</li>';
     } else {
-        $html .= '<li class="page-item disabled"><span class="page-link" aria-disabled="true">Siguiente &raquo;</span></li>';
+        $html .= '<li class="page-item disabled"><span class="page-link">Siguiente &raquo;</span></li>';
     }
 
     $html .= '</ul>';
