@@ -224,6 +224,7 @@ $aerolineas = obtenerAerolineas();
             <div class="col-md-6">
                 <article class="card h-100 border shadow-sm">
                     <div class="card-body">
+                        <h3 class="visually-hidden">Novedad del <?= date('d/m/Y', strtotime($nov['fechaPublicacionNovedad'])) ?></h3>
                         <div class="d-flex align-items-center gap-2 mb-2 text-muted small">
                             <i class="bi bi-calendar3"></i>
                             <span>Publicado: <?= date('d/m/Y', strtotime($nov['fechaPublicacionNovedad'])) ?></span>

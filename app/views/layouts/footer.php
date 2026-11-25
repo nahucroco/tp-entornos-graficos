@@ -1,7 +1,7 @@
     </div> <!-- /container -->
 </main>
 
-<footer class="footer-condor py-5 mt-auto" role="contentinfo">
+<footer class="footer-condor py-5 mt-auto">
     <div class="container">
         <div class="row g-4 mb-4">
             <!-- Columna 1: Identidad Corporativa -->

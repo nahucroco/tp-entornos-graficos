@@ -20,7 +20,7 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
 
-<header role="banner">
+<header>
     <!-- Navegación principal -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-condor" aria-label="Navegación principal del sitio">
         <div class="container">
@@ -145,7 +145,7 @@ $paginaActual = $_GET['pagina'] ?? 'inicio';
     </nav>
 </header>
 
-<main id="contenido" class="py-4" role="main">
+<main id="contenido" class="py-4">
     <div class="container">
         <!-- Notificaciones y Alertas Flash -->
         <?php if (!empty($_SESSION['mensaje'])): ?>
