@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "php-local",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "localhost:8085", "-t", "public"],
+      "port": 8085
+    }
+  ]
+}
