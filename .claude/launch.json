@@ -4,7 +4,7 @@
     {
       "name": "php-local",
       "runtimeExecutable": "php",
-      "runtimeArgs": ["-S", "localhost:8085", "-t", "public"],
+      "runtimeArgs": ["-d", "extension_dir=C:/php/ext", "-d", "extension=pdo_mysql", "-d", "extension=openssl", "-d", "extension=mbstring", "-S", "localhost:8085", "-t", "public"],
       "port": 8085
     }
   ]

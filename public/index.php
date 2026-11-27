@@ -44,6 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
 
+                if ($user['tipoUsuario'] === 'usuario' && (int)$user['emailValidado'] !== 1) {
+                    $_SESSION['mensaje'] = 'Todavía no validaste tu registro. Revisá tu casilla de correo (y la carpeta de spam) y hacé clic en el enlace que te enviamos.';
+                    $_SESSION['tipo_mensaje'] = 'warning';
+                    $_SESSION['email_sin_validar'] = $user['emailUsuario'];
+                    header('Location: index.php?pagina=login');
+                    exit;
+                }
+
                 iniciarSesionUsuario($user);
                 $_SESSION['mensaje'] = '¡Bienvenido/a de nuevo, ' . htmlspecialchars($user['nombreUsuario']) . '!';
                 $_SESSION['tipo_mensaje'] = 'success';
@@ -119,11 +127,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $res = registrarUsuario($nombre, $email, $clave, $telefono, $tipoUsuario);
             if ($res['ok']) {
-                enviarMailBienvenida($email, $nombre);
-                $avisoCorreo = smtpConfigurado()
-                    ? ' Te enviamos un correo de bienvenida.'
-                    : ($tipoUsuario === 'usuario' ? ' Tu cuenta ya está activa y no requiere validación por correo.' : '');
-                $_SESSION['mensaje'] = $res['mensaje'] . $avisoCorreo;
+                if (!empty($res['tokenValidacion'])) {
+                    enviarMailValidacionRegistro($email, $nombre, $res['tokenValidacion']);
+                    guardarEnlaceValidacionDemo($res['tokenValidacion']);
+                } else {
+                    enviarMailBienvenida($email, $nombre);
+                }
+                $_SESSION['mensaje'] = $res['mensaje'];
                 $_SESSION['tipo_mensaje'] = 'success';
                 header('Location: index.php?pagina=login');
                 exit;
@@ -133,6 +143,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: index.php?pagina=registro');
                 exit;
             }
+
+        case 'reenviar_validacion':
+            $email = trim($_POST['email'] ?? '');
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $renovado = renovarTokenValidacion($email);
+                if ($renovado) {
+                    enviarMailValidacionRegistro($email, $renovado['nombre'], $renovado['token']);
+                    guardarEnlaceValidacionDemo($renovado['token']);
+                }
+            }
+            // Mensaje genérico: no revela si el correo existe o si ya estaba validado.
+            $_SESSION['mensaje'] = 'Si tu cuenta está pendiente de validación, te enviamos un nuevo enlace a tu correo. Recordá que vence en ' . HORAS_VALIDEZ_TOKEN_VALIDACION . ' horas.';
+            $_SESSION['tipo_mensaje'] = 'info';
+            header('Location: index.php?pagina=login');
+            exit;
 
         case 'recuperar_clave':
             $email = trim($_POST['email'] ?? '');
@@ -574,6 +599,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ==========================================
 
 $pagina = $_GET['pagina'] ?? 'inicio';
+
+// Enlace de validación del registro recibido por correo
+if ($pagina === 'validar_cuenta') {
+    $resultado = validarEmailConToken((string)($_GET['token'] ?? ''));
+    if ($resultado['ok']) {
+        $_SESSION['mensaje'] = '¡Listo! Tu correo ' . $resultado['email'] . ' quedó validado. Ya podés iniciar sesión.';
+        $_SESSION['tipo_mensaje'] = 'success';
+    } elseif ($resultado['motivo'] === 'expirado') {
+        $_SESSION['mensaje'] = 'El enlace de validación venció. Pedí uno nuevo desde el formulario de abajo.';
+        $_SESSION['tipo_mensaje'] = 'warning';
+        $_SESSION['email_sin_validar'] = $resultado['email'];
+    } else {
+        $_SESSION['mensaje'] = 'El enlace de validación no es válido o ya fue utilizado. Si ya validaste tu cuenta, iniciá sesión normalmente.';
+        $_SESSION['tipo_mensaje'] = 'danger';
+    }
+    header('Location: index.php?pagina=login');
+    exit;
+}
 
 // Rutas exclusivas de Pasajeros / Usuarios Autenticados
 $rutasPasajeros = ['perfil', 'reservas', 'reserva_detalle', 'historial'];

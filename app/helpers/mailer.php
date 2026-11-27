@@ -178,13 +178,85 @@ function registrarEnLogMailing(array $datos): void
     @file_put_contents($logFile, $registro, FILE_APPEND);
 }
 
+/**
+ * URL base del sitio para armar los enlaces de los correos.
+ * Usa APP_URL si está definida (por ejemplo https://condor-aeroreserva.onrender.com);
+ * si no, la deduce del pedido actual (sirve tanto en local como detrás del proxy de Render).
+ */
+function urlBaseSitio(): string
+{
+    $configurada = getenv('APP_URL') ?: ($_ENV['APP_URL'] ?? '');
+    if ($configurada !== '') {
+        return rtrim($configurada, '/');
+    }
+
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $dir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+
+    return ($https ? 'https' : 'http') . '://' . $host . $dir;
+}
+
+function urlValidacionRegistro(string $token): string
+{
+    return urlBaseSitio() . '/index.php?pagina=validar_cuenta&token=' . urlencode($token);
+}
+
+/**
+ * Modo demostración: si no hay servidor SMTP configurado el correo no sale realmente
+ * (queda solo en storage/logs/mail.log), así que se guarda el enlace para mostrarlo
+ * en la pantalla de login y que el registro se pueda completar igual.
+ * Con SMTP configurado no hace nada: el enlace solo llega por correo.
+ */
+function guardarEnlaceValidacionDemo(string $token): void
+{
+    if (!smtpConfigurado()) {
+        $_SESSION['enlace_validacion_demo'] = urlValidacionRegistro($token);
+    }
+}
+
 // ==========================================
 // PLANTILLAS Y EVENTOS DE NOTIFICACIÓN
 // ==========================================
 
+function enviarMailValidacionRegistro(string $email, string $nombre, string $token): bool
+{
+    $asunto = "Validá tu registro en Cóndor AeroReserva";
+    $link = htmlspecialchars(urlValidacionRegistro($token), ENT_QUOTES, 'UTF-8');
+    $nombreSeguro = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
+    $horas = HORAS_VALIDEZ_TOKEN_VALIDACION;
+    $html = <<<HTML
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #1b0088; color: #ffffff; padding: 24px; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">Cóndor AeroReserva</h1>
+            <p style="margin: 4px 0 0; font-size: 14px; color: #70d6ff;">Validación de registro</p>
+        </div>
+        <div style="padding: 24px; color: #333333; line-height: 1.6;">
+            <h2 style="color: #1b0088; font-size: 18px;">¡Hola, {$nombreSeguro}!</h2>
+            <p>Gracias por registrarte. Para activar tu cuenta y poder iniciar sesión, validá tu correo electrónico haciendo clic en el siguiente botón:</p>
+            <div style="margin: 24px 0; text-align: center;">
+                <a href="{$link}" style="background-color: #e71d36; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Validar mi registro</a>
+            </div>
+            <p style="font-size: 13px; color: #555555;">Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br><a href="{$link}" style="color: #1b0088; word-break: break-all;">{$link}</a></p>
+            <p style="font-size: 12px; color: #777777;">El enlace es válido por {$horas} horas. Si no realizaste este registro, ignorá este mensaje.</p>
+        </div>
+        <div style="background-color: #f8f9fa; padding: 16px; text-align: center; font-size: 12px; color: #666666; border-top: 1px solid #e0e0e0;">
+            Cóndor AeroReserva · Proyecto Final Entornos Gráficos · UTN FRRo
+        </div>
+    </div>
+HTML;
+
+    $texto = "Hola, {$nombre}:\n\nPara validar tu registro en Cóndor AeroReserva ingresá a este enlace:\n"
+        . urlValidacionRegistro($token) . "\n\nEl enlace es válido por {$horas} horas.";
+
+    return enviarCorreo($email, $nombre, $asunto, $html, $texto);
+}
+
 function enviarMailBienvenida(string $email, string $nombre): bool
 {
     $asunto = "¡Bienvenido/a a Cóndor AeroReserva!";
+    $base = urlBaseSitio();
     $html = <<<HTML
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #1b0088; color: #ffffff; padding: 24px; text-align: center;">
@@ -195,7 +267,7 @@ function enviarMailBienvenida(string $email, string $nombre): bool
             <h2 style="color: #1b0088; font-size: 18px;">¡Hola, {$nombre}!</h2>
             <p>Tu cuenta ha sido creada exitosamente. A partir de este momento podés buscar vuelos en tiempo real, acceder a promociones exclusivas y gestionar tus pasajes desde cualquier dispositivo.</p>
             <div style="margin: 24px 0; text-align: center;">
-                <a href="http://127.0.0.1:8000/index.php?pagina=vuelos" style="background-color: #e71d36; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Explorar Vuelos Disponibles</a>
+                <a href="{$base}/index.php?pagina=vuelos" style="background-color: #e71d36; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Explorar Vuelos Disponibles</a>
             </div>
             <p style="font-size: 12px; color: #777777;">Si no realizaste este registro, por favor ignorá este mensaje.</p>
         </div>
@@ -211,7 +283,7 @@ HTML;
 function enviarMailRecuperacionClave(string $email, string $token): bool
 {
     $asunto = "Recuperación de contraseña - Cóndor AeroReserva";
-    $link = "http://127.0.0.1:8000/index.php?pagina=recuperar_clave&token=" . urlencode($token);
+    $link = urlBaseSitio() . "/index.php?pagina=recuperar_clave&token=" . urlencode($token);
     $html = <<<HTML
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #1b0088; color: #ffffff; padding: 24px; text-align: center;">
@@ -244,6 +316,7 @@ function enviarMailConfirmacionReserva(array $reserva): bool
     $ruta = htmlspecialchars($reserva['origenVuelo']) . " → " . htmlspecialchars($reserva['destinoVuelo']);
     $monto = number_format((float)$reserva['precioFinal'], 2, ',', '.');
     $asunto = "Comprobante de Reserva #{$codReserva} Confirmada - Cóndor AeroReserva";
+    $base = urlBaseSitio();
 
     $html = <<<HTML
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -262,7 +335,7 @@ function enviarMailConfirmacionReserva(array $reserva): bool
             </div>
             <p style="font-size: 13px; color: #555555;">Recordá presentarte en el aeropuerto con 2 horas de anticipación para vuelos de cabotaje portando tu DNI original vigente.</p>
             <div style="margin: 24px 0; text-align: center;">
-                <a href="http://127.0.0.1:8000/index.php?pagina=reserva_detalle&id={$codReserva}" style="background-color: #e71d36; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ver / Imprimir Voucher</a>
+                <a href="{$base}/index.php?pagina=reserva_detalle&id={$codReserva}" style="background-color: #e71d36; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Ver / Imprimir Voucher</a>
             </div>
         </div>
         <div style="background-color: #f8f9fa; padding: 16px; text-align: center; font-size: 12px; color: #666666; border-top: 1px solid #e0e0e0;">

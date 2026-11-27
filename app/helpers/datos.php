@@ -841,6 +841,90 @@ function obtenerDistribucionUsuarios(): array
 // MUTACIONES Y OPERACIONES CRUD
 // ==========================================
 
+// ==========================================
+// VALIDACIÓN DE CORREO DEL REGISTRO
+// ==========================================
+
+const HORAS_VALIDEZ_TOKEN_VALIDACION = 24;
+
+/** Token aleatorio que viaja en el enlace del correo (en la BD se guarda solo su hash). */
+function generarTokenValidacion(): string
+{
+    return bin2hex(random_bytes(32));
+}
+
+function hashTokenValidacion(string $token): string
+{
+    return hash('sha256', $token);
+}
+
+/**
+ * Valida el registro de un Usuario/Cliente a partir del token recibido por correo.
+ * Devuelve ['ok' => bool, 'motivo' => 'validado'|'invalido'|'expirado', 'email' => ?string].
+ */
+function validarEmailConToken(string $token): array
+{
+    if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
+        return ['ok' => false, 'motivo' => 'invalido', 'email' => null];
+    }
+
+    try {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT codUsuario, emailUsuario, tokenExpiracion FROM usuarios
+                              WHERE tokenValidacion = ? AND emailValidado = 0 LIMIT 1");
+        $stmt->execute([hashTokenValidacion($token)]);
+        $usuario = $stmt->fetch();
+
+        if (!$usuario) {
+            return ['ok' => false, 'motivo' => 'invalido', 'email' => null];
+        }
+
+        if (!empty($usuario['tokenExpiracion']) && strtotime($usuario['tokenExpiracion']) < time()) {
+            return ['ok' => false, 'motivo' => 'expirado', 'email' => $usuario['emailUsuario']];
+        }
+
+        $upd = $db->prepare("UPDATE usuarios SET emailValidado = 1, tokenValidacion = NULL, tokenExpiracion = NULL
+                             WHERE codUsuario = ?");
+        $upd->execute([$usuario['codUsuario']]);
+
+        return ['ok' => true, 'motivo' => 'validado', 'email' => $usuario['emailUsuario']];
+    } catch (Throwable $e) {
+        error_log("Error al validar correo: " . $e->getMessage());
+        return ['ok' => false, 'motivo' => 'invalido', 'email' => null];
+    }
+}
+
+/**
+ * Genera un nuevo enlace de validación para un Usuario/Cliente que todavía no validó su correo.
+ * Devuelve ['nombre' => ..., 'token' => ...] o null si no corresponde reenviar.
+ */
+function renovarTokenValidacion(string $email): ?array
+{
+    try {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT codUsuario, nombreUsuario FROM usuarios
+                              WHERE emailUsuario = ? AND tipoUsuario = 'usuario' AND emailValidado = 0 LIMIT 1");
+        $stmt->execute([$email]);
+        $usuario = $stmt->fetch();
+        if (!$usuario) {
+            return null;
+        }
+
+        $token = generarTokenValidacion();
+        $upd = $db->prepare("UPDATE usuarios SET tokenValidacion = ?, tokenExpiracion = ? WHERE codUsuario = ?");
+        $upd->execute([
+            hashTokenValidacion($token),
+            date('Y-m-d H:i:s', time() + HORAS_VALIDEZ_TOKEN_VALIDACION * 3600),
+            $usuario['codUsuario'],
+        ]);
+
+        return ['nombre' => $usuario['nombreUsuario'], 'token' => $token];
+    } catch (Throwable $e) {
+        error_log("Error al renovar token de validación: " . $e->getMessage());
+        return null;
+    }
+}
+
 function registrarUsuario(string $nombre, string $email, string $clave, string $telefono = '', string $tipoUsuario = 'usuario'): array
 {
     
@@ -862,16 +946,26 @@ function registrarUsuario(string $nombre, string $email, string $clave, string $
         $esCeo = $tipoUsuario === 'ceo de aerolínea';
         $estado = $esCeo ? 'pendiente' : 'activo';
         $hash = password_hash($clave, PASSWORD_BCRYPT);
-        $stmt = $db->prepare("INSERT INTO usuarios (nombreUsuario, claveUsuario, tipoUsuario, emailUsuario, telefonoUsuario, estadoUsuario, emailValidado, fechaCreacion)
-                              VALUES (?, ?, ?, ?, ?, ?, 1, NOW())");
-        $stmt->execute([$nombre, $hash, $tipoUsuario, $email, $telefono, $estado]);
+
+        // El CEO lo valida el Administrador; el Usuario/Cliente valida su correo con un enlace.
+        $tokenValidacion = $esCeo ? null : generarTokenValidacion();
+        $emailValidado = $esCeo ? 1 : 0;
+
+        $stmt = $db->prepare("INSERT INTO usuarios (nombreUsuario, claveUsuario, tipoUsuario, emailUsuario, telefonoUsuario, estadoUsuario, emailValidado, tokenValidacion, tokenExpiracion, fechaCreacion)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([
+            $nombre, $hash, $tipoUsuario, $email, $telefono, $estado, $emailValidado,
+            $tokenValidacion ? hashTokenValidacion($tokenValidacion) : null,
+            $tokenValidacion ? date('Y-m-d H:i:s', time() + HORAS_VALIDEZ_TOKEN_VALIDACION * 3600) : null,
+        ]);
         $id = (int)$db->lastInsertId();
 
         return [
             'ok' => true,
             'mensaje' => $esCeo
                 ? '¡Solicitud enviada con éxito! Un administrador debe aprobar tu cuenta de CEO antes de que puedas ingresar.'
-                : '¡Cuenta creada con éxito! Ya podés iniciar sesión y reservar tus pasajes.',
+                : '¡Cuenta creada con éxito! Te enviamos un correo a ' . $email . ' con un enlace para validar tu registro. Tenés que validarlo antes de iniciar sesión.',
+            'tokenValidacion' => $tokenValidacion,
             'usuario' => [
                 'codUsuario' => $id,
                 'nombreUsuario' => $nombre,
