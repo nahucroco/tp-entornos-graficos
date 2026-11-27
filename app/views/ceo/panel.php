@@ -10,7 +10,7 @@ if (!usuarioLogueado() || !esCeo()) {
 $usuario = obtenerUsuario();
 $metricas = obtenerMetricasCeo((int)$usuario['id']);
 $aerolinea = $metricas['aerolinea'];
-$vuelos = obtenerVuelosPorCeo((int)$usuario['id']);
+$vuelos = obtenerVuelosPorCeo((int)$usuario['id'], null, 0, [], 'salida_prox');
 $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
 ?>
 

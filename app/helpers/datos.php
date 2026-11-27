@@ -731,16 +731,62 @@ function obtenerAerolineaDeCeo(int $codUsuarioCeo): ?array
     }
 }
 
-function contarTotalVuelosPorCeo(int $codUsuarioCeo): int
+/** Opciones de orden del listado de vuelos del CEO (clave => [etiqueta, ORDER BY]). */
+const ORDENES_VUELOS_CEO = [
+    'recientes'     => ['Últimos cargados primero', 'v.codVuelo DESC'],
+    'salida_prox'   => ['Fecha de salida (más antigua primero)', 'v.fechaSalidaVuelo ASC, v.horaSalidaVuelo ASC'],
+    'salida_lejana' => ['Fecha de salida (más lejana primero)', 'v.fechaSalidaVuelo DESC, v.horaSalidaVuelo DESC'],
+    'precio_asc'    => ['Menor precio', 'v.precioVuelo ASC, v.codVuelo DESC'],
+    'precio_desc'   => ['Mayor precio', 'v.precioVuelo DESC, v.codVuelo DESC'],
+    'reservas_desc' => ['Más reservas', 'reservasRealizadas DESC, v.codVuelo DESC'],
+    'asientos_asc'  => ['Menos asientos disponibles', 'v.asientosDisponibles ASC, v.codVuelo DESC'],
+    'codigo_asc'    => ['Código (ascendente)', 'v.codVuelo ASC'],
+];
+
+/**
+ * Arma el WHERE del listado de vuelos del CEO según los filtros:
+ * 'buscar' (origen, destino o código), 'estado' (proximos | partidos | todos), 'desde' y 'hasta' (fechas).
+ */
+function filtrosVuelosCeo(int $codAerolinea, array $filtros): array
+{
+    $where = ['v.codAerolinea = ?'];
+    $params = [$codAerolinea];
+
+    $buscar = trim((string)($filtros['buscar'] ?? ''));
+    if ($buscar !== '') {
+        $where[] = '(v.origenVuelo LIKE ? OR v.destinoVuelo LIKE ? OR CAST(v.codVuelo AS CHAR) = ?)';
+        array_push($params, "%{$buscar}%", "%{$buscar}%", ltrim($buscar, '#'));
+    }
+
+    $estado = $filtros['estado'] ?? 'todos';
+    if ($estado === 'proximos') {
+        $where[] = 'TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()';
+    } elseif ($estado === 'partidos') {
+        $where[] = 'TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) <= NOW()';
+    }
+
+    foreach (['desde' => '>=', 'hasta' => '<='] as $clave => $operador) {
+        $fecha = (string)($filtros[$clave] ?? '');
+        if ($fecha !== '' && DateTime::createFromFormat('!Y-m-d', $fecha)) {
+            $where[] = "v.fechaSalidaVuelo {$operador} ?";
+            $params[] = $fecha;
+        }
+    }
+
+    return [implode(' AND ', $where), $params];
+}
+
+function contarTotalVuelosPorCeo(int $codUsuarioCeo, array $filtros = []): int
 {
     try {
         $aero = obtenerAerolineaDeCeo($codUsuarioCeo);
         if (!$aero) {
             return 0;
         }
+        [$where, $params] = filtrosVuelosCeo((int)$aero['codAerolinea'], $filtros);
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT COUNT(*) FROM vuelos WHERE codAerolinea = ?");
-        $stmt->execute([$aero['codAerolinea']]);
+        $stmt = $db->prepare("SELECT COUNT(*) FROM vuelos v WHERE {$where}");
+        $stmt->execute($params);
         return (int)$stmt->fetchColumn();
     } catch (Throwable $e) {
         error_log("Error al contar vuelos de CEO: " . $e->getMessage());
@@ -748,27 +794,30 @@ function contarTotalVuelosPorCeo(int $codUsuarioCeo): int
     }
 }
 
-function obtenerVuelosPorCeo(int $codUsuarioCeo, ?int $limite = null, int $offset = 0): array
+function obtenerVuelosPorCeo(int $codUsuarioCeo, ?int $limite = null, int $offset = 0, array $filtros = [], string $orden = 'recientes'): array
 {
     try {
         $aero = obtenerAerolineaDeCeo($codUsuarioCeo);
         if (!$aero) {
             return [];
         }
+        [$where, $params] = filtrosVuelosCeo((int)$aero['codAerolinea'], $filtros);
+        $orderBy = (ORDENES_VUELOS_CEO[$orden] ?? ORDENES_VUELOS_CEO['recientes'])[1];
+
         $db = Database::getConnection();
         $sql = "SELECT v.*, a.nombreAerolinea, a.codigoIATA,
                       (SELECT COUNT(*) FROM reservas r WHERE r.codVuelo = v.codVuelo AND r.estadoReserva != 'cancelada') AS reservasRealizadas
                       FROM vuelos v
                       INNER JOIN aerolineas a ON v.codAerolinea = a.codAerolinea
-                      WHERE v.codAerolinea = ?
-                      ORDER BY v.fechaSalidaVuelo ASC, v.horaSalidaVuelo ASC";
+                      WHERE {$where}
+                      ORDER BY {$orderBy}";
 
         if ($limite !== null && $limite > 0) {
             $sql .= " LIMIT " . (int)$limite . " OFFSET " . (int)$offset;
         }
 
         $stmt = $db->prepare($sql);
-        $stmt->execute([$aero['codAerolinea']]);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     } catch (Throwable $e) {
         error_log("Error al obtener vuelos de CEO: " . $e->getMessage());

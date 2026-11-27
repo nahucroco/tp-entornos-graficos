@@ -11,13 +11,23 @@ $usuario = obtenerUsuario();
 $metricas = obtenerMetricasCeo((int)$usuario['id']);
 $aerolinea = $metricas['aerolinea'];
 
+// Filtros y orden del listado (por defecto: últimos vuelos cargados primero)
+$filtros = [
+    'buscar' => trim((string)($_GET['buscar'] ?? '')),
+    'estado' => in_array($_GET['estado'] ?? '', ['proximos', 'partidos'], true) ? $_GET['estado'] : 'todos',
+    'desde'  => (string)($_GET['desde'] ?? ''),
+    'hasta'  => (string)($_GET['hasta'] ?? ''),
+];
+$orden = array_key_exists($_GET['orden'] ?? '', ORDENES_VUELOS_CEO) ? $_GET['orden'] : 'recientes';
+$hayFiltros = $filtros['buscar'] !== '' || $filtros['estado'] !== 'todos' || $filtros['desde'] !== '' || $filtros['hasta'] !== '' || $orden !== 'recientes';
+
 $paginaActual = max(1, (int)($_GET['p'] ?? 1));
 $porPagina = 5;
-$totalVuelosCeo = contarTotalVuelosPorCeo((int)$usuario['id']);
+$totalVuelosCeo = contarTotalVuelosPorCeo((int)$usuario['id'], $filtros);
 $totalPaginas = (int)ceil($totalVuelosCeo / $porPagina);
 $offset = ($paginaActual - 1) * $porPagina;
 
-$vuelos = obtenerVuelosPorCeo((int)$usuario['id'], $porPagina, $offset);
+$vuelos = obtenerVuelosPorCeo((int)$usuario['id'], $porPagina, $offset, $filtros, $orden);
 
 $editarId = !empty($_GET['editar']) ? (int)$_GET['editar'] : 0;
 $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
@@ -103,8 +113,48 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
 <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h5 fw-bold mb-0">Listado de Vuelos Registrados</h2>
-        <span class="badge bg-secondary"><?= count($vuelos) ?> vuelo(s)</span>
+        <span class="badge bg-secondary"><?= $totalVuelosCeo ?> vuelo(s)</span>
     </div>
+
+    <!-- Filtros y orden del listado -->
+    <form method="get" action="index.php" class="row g-2 align-items-end mb-3" aria-label="Filtrar y ordenar vuelos">
+        <input type="hidden" name="pagina" value="ceo_vuelos">
+        <div class="col-12 col-md-4 col-lg-3">
+            <label for="filtro-buscar" class="form-label small fw-bold mb-1">Buscar</label>
+            <input type="search" class="form-control form-control-sm" id="filtro-buscar" name="buscar"
+                   value="<?= htmlspecialchars($filtros['buscar']) ?>" placeholder="Origen, destino o código">
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label for="filtro-estado" class="form-label small fw-bold mb-1">Vuelos</label>
+            <select class="form-select form-select-sm" id="filtro-estado" name="estado">
+                <option value="todos" <?= $filtros['estado'] === 'todos' ? 'selected' : '' ?>>Todos</option>
+                <option value="proximos" <?= $filtros['estado'] === 'proximos' ? 'selected' : '' ?>>Próximos</option>
+                <option value="partidos" <?= $filtros['estado'] === 'partidos' ? 'selected' : '' ?>>Ya partieron</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label for="filtro-desde" class="form-label small fw-bold mb-1">Salida desde</label>
+            <input type="date" class="form-control form-control-sm" id="filtro-desde" name="desde" value="<?= htmlspecialchars($filtros['desde']) ?>">
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label for="filtro-hasta" class="form-label small fw-bold mb-1">Salida hasta</label>
+            <input type="date" class="form-control form-control-sm" id="filtro-hasta" name="hasta" value="<?= htmlspecialchars($filtros['hasta']) ?>">
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <label for="filtro-orden" class="form-label small fw-bold mb-1">Ordenar por</label>
+            <select class="form-select form-select-sm" id="filtro-orden" name="orden">
+                <?php foreach (ORDENES_VUELOS_CEO as $clave => [$etiqueta]): ?>
+                    <option value="<?= $clave ?>" <?= $orden === $clave ? 'selected' : '' ?>><?= $etiqueta ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-12 col-md-4 col-lg-1 d-flex gap-1">
+            <button type="submit" class="btn btn-sm btn-primary flex-fill">Aplicar</button>
+            <?php if ($hayFiltros): ?>
+                <a href="index.php?pagina=ceo_vuelos" class="btn btn-sm btn-outline-secondary" title="Quitar filtros" aria-label="Quitar filtros"><i class="bi bi-x-lg" aria-hidden="true"></i></a>
+            <?php endif; ?>
+        </div>
+    </form>
 
     <?php if (!empty($vuelos)): ?>
         <div class="table-responsive">
@@ -155,7 +205,13 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
         </div>
 
         <!-- Paginación Numérica -->
-        <?= renderizarPaginador($paginaActual, $totalPaginas, 'ceo_vuelos') ?>
+        <?= renderizarPaginador($paginaActual, $totalPaginas, 'ceo_vuelos', array_filter($filtros + ['orden' => $orden], fn($v) => $v !== '' && $v !== 'todos' && $v !== 'recientes')) ?>
+    <?php elseif ($hayFiltros): ?>
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-search display-6 mb-2"></i>
+            <p class="mb-2">No hay vuelos que coincidan con los filtros elegidos.</p>
+            <a href="index.php?pagina=ceo_vuelos" class="btn btn-sm btn-outline-primary">Quitar filtros</a>
+        </div>
     <?php else: ?>
         <div class="p-4 text-center text-muted">
             <i class="bi bi-airplane display-4 mb-2"></i>
