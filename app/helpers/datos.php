@@ -272,6 +272,7 @@ function obtenerPromocionesAprobadas(): array
                 FROM promociones p
                 INNER JOIN aerolineas a ON p.codAerolinea = a.codAerolinea
                 WHERE p.estadoPromocion = 'aprobada'
+                  AND (p.fechaInicio IS NULL OR p.fechaInicio <= CURRENT_DATE)
                   AND (p.fechaFin IS NULL OR p.fechaFin >= CURRENT_DATE)
                 ORDER BY p.descuentoPromocion DESC";
         return $db->query($sql)->fetchAll();
@@ -289,6 +290,7 @@ function obtenerPromocionesPorAerolinea(int $codAerolinea): array
                                FROM promociones p
                                INNER JOIN aerolineas a ON p.codAerolinea = a.codAerolinea
                                WHERE p.codAerolinea = ? AND p.estadoPromocion = 'aprobada'
+                                 AND (p.fechaInicio IS NULL OR p.fechaInicio <= CURRENT_DATE)
                                  AND (p.fechaFin IS NULL OR p.fechaFin >= CURRENT_DATE)
                                ORDER BY p.descuentoPromocion DESC");
         $stmt->execute([$codAerolinea]);
@@ -296,6 +298,61 @@ function obtenerPromocionesPorAerolinea(int $codAerolinea): array
     } catch (Throwable $e) {
         error_log("Error al obtener promociones de aerolínea: " . $e->getMessage());
         return [];
+    }
+}
+
+/**
+ * Promoción vigente de cada aerolínea, indexada por codAerolinea (para el listado de vuelos).
+ * Si por datos viejos hubiera más de una, se toma la de mayor descuento.
+ */
+function obtenerPromocionVigentePorAerolinea(): array
+{
+    $mapa = [];
+    foreach (obtenerPromocionesAprobadas() as $promo) {
+        $mapa[(int)$promo['codAerolinea']] ??= $promo;
+    }
+    return $mapa;
+}
+
+/**
+ * Devuelve la promoción solo si se puede aplicar a un vuelo de esa aerolínea:
+ * aprobada, de la misma aerolínea y vigente hoy. Si no, null.
+ */
+function obtenerPromocionAplicable(int $codPromocion, int $codAerolinea): ?array
+{
+    foreach (obtenerPromocionesPorAerolinea($codAerolinea) as $promo) {
+        if ((int)$promo['codPromocion'] === $codPromocion) {
+            return $promo;
+        }
+    }
+    return null;
+}
+
+/**
+ * Regla de negocio: sólo una promoción vigente por aerolínea en un momento dado.
+ * Busca otra promoción aprobada de la misma aerolínea cuyas fechas se superpongan con la indicada.
+ */
+function buscarPromocionAprobadaSuperpuesta(int $codPromocion): ?array
+{
+    try {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT otra.codPromocion, otra.descripcionPromocion, otra.fechaInicio, otra.fechaFin
+                              FROM promociones p
+                              INNER JOIN promociones otra
+                                      ON otra.codAerolinea = p.codAerolinea
+                                     AND otra.codPromocion <> p.codPromocion
+                                     AND otra.estadoPromocion = 'aprobada'
+                              WHERE p.codPromocion = ?
+                                AND (otra.fechaFin IS NULL OR otra.fechaFin >= CURRENT_DATE)
+                                AND (p.fechaFin IS NULL OR otra.fechaInicio IS NULL OR otra.fechaInicio <= p.fechaFin)
+                                AND (otra.fechaFin IS NULL OR p.fechaInicio IS NULL OR p.fechaInicio <= otra.fechaFin)
+                              ORDER BY otra.fechaInicio
+                              LIMIT 1");
+        $stmt->execute([$codPromocion]);
+        return $stmt->fetch() ?: null;
+    } catch (Throwable $e) {
+        error_log("Error al verificar superposición de promociones: " . $e->getMessage());
+        return null;
     }
 }
 

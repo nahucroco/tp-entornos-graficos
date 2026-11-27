@@ -20,6 +20,7 @@ $offset = ($paginaActual - 1) * $porPagina;
 // Consultar vuelos en la BD con paginación
 $vuelos = obtenerVuelos($filtroOrigen, $filtroDestino, $filtroFecha, $filtroAerolinea, $filtroPrecioMax, $orden, $porPagina, $offset);
 $aerolineas = obtenerAerolineas();
+$promoPorAerolinea = obtenerPromocionVigentePorAerolinea();
 ?>
 
 <!-- BREADCRUMBS -->
@@ -197,6 +198,17 @@ $aerolineas = obtenerAerolineas();
                                     $<?= number_format((float)$vuelo['precioVuelo'], 0, ',', '.') ?>
                                 </div>
                                 <span class="small text-muted mb-3 d-block">Tasas e impuestos incluidos</span>
+
+                                <?php $promoVuelo = $promoPorAerolinea[(int)$vuelo['codAerolinea']] ?? null; ?>
+                                <?php if ($promoVuelo): ?>
+                                    <div class="small mb-3">
+                                        <span class="badge bg-danger"><i class="bi bi-tag-fill me-1" aria-hidden="true"></i><?= (int)$promoVuelo['descuentoPromocion'] ?>% OFF</span>
+                                        <div class="text-success fw-bold mt-1">
+                                            $<?= number_format((float)$vuelo['precioVuelo'] * (1 - (float)$promoVuelo['descuentoPromocion'] / 100), 0, ',', '.') ?> con promo
+                                        </div>
+                                        <div class="text-muted"><?= htmlspecialchars($promoVuelo['descripcionPromocion']) ?></div>
+                                    </div>
+                                <?php endif; ?>
 
                                 <?php if ($asientos > 0): ?>
                                     <div class="d-flex flex-column gap-2">

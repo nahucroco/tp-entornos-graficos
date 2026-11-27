@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $user = obtenerUsuario();
             $vueloId = (int)($_POST['vuelo_id'] ?? 0);
-            $promoId = !empty($_POST['promo_id']) ? (int)$_POST['promo_id'] : null;
+            $promoId = !empty($_POST['promocion_id']) ? (int)$_POST['promocion_id'] : null;
 
             $vuelo = obtenerVueloPorId($vueloId);
             if (!$vuelo) {
@@ -226,13 +226,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $precioFinal = (float)$vuelo['precioVuelo'];
             if ($promoId) {
-                $db = Database::getConnection();
-                $stmt = $db->prepare("SELECT descuentoPromocion FROM promociones WHERE codPromocion = ? AND estadoPromocion = 'aprobada' LIMIT 1");
-                $stmt->execute([$promoId]);
-                $descuento = (float)$stmt->fetchColumn();
-                if ($descuento > 0) {
-                    $precioFinal = $precioFinal * (1 - ($descuento / 100));
+                // La promoción tiene que ser de la aerolínea del vuelo, estar aprobada y vigente.
+                $promo = obtenerPromocionAplicable($promoId, (int)$vuelo['codAerolinea']);
+                if (!$promo) {
+                    $_SESSION['mensaje'] = 'La promoción seleccionada no está vigente para la aerolínea de este vuelo. Elegí otra o reservá con la tarifa estándar.';
+                    $_SESSION['tipo_mensaje'] = 'warning';
+                    header('Location: index.php?pagina=reservar&vuelo=' . $vueloId);
+                    exit;
                 }
+                $precioFinal = round($precioFinal * (1 - ((float)$promo['descuentoPromocion'] / 100)), 2);
             }
 
             $reservaId = crearReserva((int)$user['id'], $vueloId, $promoId, $precioFinal);
@@ -499,7 +501,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             $promoId = (int)($_POST['promocion_id'] ?? 0);
-            $estado = $_POST['estado'] === 'aprobada' ? 'aprobada' : 'denegada';
+            $estado = ($_POST['estado'] ?? '') === 'aprobada' ? 'aprobada' : 'denegada';
+
+            // Regla de negocio: sólo una promoción vigente por aerolínea en un momento dado.
+            if ($estado === 'aprobada' && ($otra = buscarPromocionAprobadaSuperpuesta($promoId))) {
+                $hasta = $otra['fechaFin'] ? ' (vigente hasta el ' . date('d/m/Y', strtotime($otra['fechaFin'])) . ')' : '';
+                $_SESSION['mensaje'] = 'No se puede aprobar la promoción #' . $promoId . ': la aerolínea ya tiene aprobada la promoción #'
+                    . $otra['codPromocion'] . ' "' . $otra['descripcionPromocion'] . '"' . $hasta
+                    . ' y sus fechas se superponen. Sólo puede haber una promoción vigente por aerolínea.';
+                $_SESSION['tipo_mensaje'] = 'danger';
+                header('Location: index.php?pagina=admin_promociones');
+                exit;
+            }
 
             cambiarEstadoPromocion($promoId, $estado);
             $_SESSION['mensaje'] = 'Promoción #' . $promoId . ' marcada como: ' . strtoupper($estado) . '.';

@@ -118,13 +118,29 @@ $vueloDisponible = fechaHoraVueloEsFutura($vuelo['fechaSalidaVuelo'], $vuelo['ho
             </div>
             <p class="small text-muted mb-3">Precio por adulto en ARS. Incluye impuestos y tasas aéreas.</p>
 
-            <?php if (!empty($promociones)): ?>
-                <div class="alert alert-warning py-2 px-3 small mb-3">
-                    <i class="bi bi-tag-fill me-1 text-danger"></i>
-                    <strong>¡Hay <?= count($promociones) ?> promo disponible!</strong><br>
-                    Podés aplicar un descuento al confirmar tu reserva.
-                </div>
-            <?php endif; ?>
+            <section class="border rounded-3 p-3 mb-3 small" aria-labelledby="titulo-promos-vuelo">
+                <h2 id="titulo-promos-vuelo" class="h6 fw-bold mb-2">
+                    <i class="bi bi-tag-fill me-1 text-danger" aria-hidden="true"></i>Promociones aplicables
+                </h2>
+                <?php if (!empty($promociones)): ?>
+                    <ul class="list-unstyled mb-2">
+                        <?php foreach ($promociones as $promo):
+                            $precioPromo = (float)$vuelo['precioVuelo'] * (1 - (float)$promo['descuentoPromocion'] / 100); ?>
+                            <li class="mb-2">
+                                <span class="badge bg-danger me-1"><?= (int)$promo['descuentoPromocion'] ?>% OFF</span>
+                                <strong><?= htmlspecialchars($promo['descripcionPromocion']) ?></strong><br>
+                                <span class="text-success fw-bold">$<?= number_format($precioPromo, 0, ',', '.') ?> con esta promoción</span>
+                                <?php if (!empty($promo['fechaFin'])): ?>
+                                    <span class="text-muted">· vigente hasta el <?= date('d/m/Y', strtotime($promo['fechaFin'])) ?></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <p class="text-muted mb-0">Promoción de <?= htmlspecialchars($vuelo['nombreAerolinea']) ?>. La elegís al confirmar tu reserva.</p>
+                <?php else: ?>
+                    <p class="text-muted mb-0"><?= htmlspecialchars($vuelo['nombreAerolinea']) ?> no tiene promociones vigentes en este momento.</p>
+                <?php endif; ?>
+            </section>
 
             <?php if (!$vueloDisponible): ?>
                 <button class="btn btn-secondary btn-lg w-100 mb-2" disabled>Vuelo no disponible</button>
