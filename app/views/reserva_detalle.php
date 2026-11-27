@@ -96,10 +96,11 @@ $novedades = obtenerNovedadesVigentes();
             <div class="mb-4">
                 <h2 class="h6 text-uppercase fw-bold text-muted border-bottom pb-2 mb-3">Datos del Pasajero Titular</h2>
                 <div class="row g-2 small">
-                    <div class="col-sm-6"><strong>Nombre y Apellido:</strong> <?= htmlspecialchars($reserva['nombreUsuario']) ?></div>
+                    <div class="col-sm-6"><strong>Nombre y Apellido:</strong> <?= htmlspecialchars(($reserva['nombrePasajero'] ?? '') ?: $reserva['nombreUsuario']) ?></div>
+                    <div class="col-sm-6"><strong>DNI / Pasaporte:</strong> <?= htmlspecialchars(($reserva['dniPasajero'] ?? '') ?: 'No registrado') ?></div>
+                    <div class="col-sm-6"><strong>Correo de Contacto:</strong> <?= htmlspecialchars(($reserva['emailPasajero'] ?? '') ?: $reserva['emailUsuario']) ?></div>
+                    <div class="col-sm-6"><strong>Teléfono:</strong> <?= htmlspecialchars(($reserva['telefonoPasajero'] ?? '') ?: ($reserva['telefonoUsuario'] ?: 'No registrado')) ?></div>
                     <div class="col-sm-6"><strong>Código de Pasajero:</strong> #<?= $reserva['codUsuario'] ?></div>
-                    <div class="col-sm-6"><strong>Correo de Contacto:</strong> <?= htmlspecialchars($reserva['emailUsuario']) ?></div>
-                    <div class="col-sm-6"><strong>Teléfono:</strong> <?= htmlspecialchars($reserva['telefonoUsuario'] ?: 'No registrado') ?></div>
                 </div>
             </div>
 
@@ -150,7 +151,7 @@ $novedades = obtenerNovedadesVigentes();
                 <?php elseif ($reserva['estadoReserva'] === 'cancelada'): ?>
                     Esta reserva se encuentra cancelada (o venció antes de confirmarse el pago) y no es válida para viajar.
                 <?php else: ?>
-                    Esta reserva se encuentra pendiente de pago. Recordá abonarla antes de la salida del vuelo para asegurar tu viaje.
+                    Esta reserva se encuentra pendiente de pago. Tenés tiempo de abonarla hasta el <strong><?= date('d/m/Y H:i', vencimientoPagoReserva($reserva['fechaReserva'])) ?> hs</strong> (<?= HORAS_LIMITE_PAGO_RESERVA ?> horas desde que la hiciste); si no, se cancela automáticamente y se libera el asiento.
                 <?php endif; ?>
             </p>
             <div class="p-2 bg-light rounded small text-center">

@@ -5,6 +5,10 @@ session_start();
 require_once __DIR__ . '/../app/helpers/auth.php';
 require_once __DIR__ . '/../app/helpers/datos.php';
 require_once __DIR__ . '/../app/helpers/mailer.php';
+require_once __DIR__ . '/../app/helpers/validacion.php';
+
+// Reservas impagas: se cancelan solas a las 72 hs de realizadas (o si el vuelo ya partió).
+expirarReservasVencidasGlobal();
 
 if (isset($_GET['salir'])) {
     cerrarSesion();
@@ -104,6 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            rechazarSiHayError(primerError(
+                errNombrePersona(trim($_POST['nombre'] ?? ''), 'El nombre'),
+                errNombrePersona(trim($_POST['apellido'] ?? ''), 'El apellido'),
+                errDocumento(trim($_POST['dni'] ?? '')),
+                errTelefono($telefono),
+                errTelefono(trim($_POST['telefono_fijo'] ?? ''), false),
+                errTexto(trim($_POST['direccion'] ?? ''), 'La dirección', 0, 150),
+                errEmail($email),
+                errClave($clave)
+            ), 'index.php?pagina=registro');
+
             if ($fechaNacimiento !== '' && !fechaNacimientoEsValida($fechaNacimiento)) {
                 $_SESSION['mensaje'] = 'La fecha de nacimiento debe ser una fecha válida, no futura y de hasta 120 años de antigüedad.';
                 $_SESSION['tipo_mensaje'] = 'warning';
@@ -179,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = trim($_POST['nombre'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
 
-            if (empty($nombre)) {
-                $_SESSION['mensaje'] = 'El nombre no puede estar vacío.';
+            if (($errorPerfil = primerError(errNombrePersona($nombre), errTelefono($telefono, false))) !== null) {
+                $_SESSION['mensaje'] = $errorPerfil;
                 $_SESSION['tipo_mensaje'] = 'warning';
             } else {
                 $res = actualizarPerfilUsuario((int)$user['id'], $nombre, $user['email'], $telefono);
@@ -224,6 +239,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            // Datos del pasajero titular
+            $pasajero = [
+                'nombre'   => trim((string)($_POST['nombre'] ?? '')),
+                'dni'      => trim((string)($_POST['dni'] ?? '')),
+                'email'    => trim((string)($_POST['email'] ?? '')),
+                'telefono' => trim((string)($_POST['telefono'] ?? '')),
+            ];
+            $errorPasajero = primerError(
+                errNombrePersona($pasajero['nombre'], 'El nombre del pasajero'),
+                errDocumento($pasajero['dni']),
+                errEmail($pasajero['email']),
+                errTelefono($pasajero['telefono'])
+            );
+            if ($errorPasajero !== null) {
+                $_SESSION['form_reserva'] = $pasajero + ['promocion_id' => $promoId];
+                rechazarSiHayError($errorPasajero, 'index.php?pagina=reservar&vuelo=' . $vueloId);
+            }
+            $pasajero['dni'] = normalizarDocumento($pasajero['dni']);
+
             $precioFinal = (float)$vuelo['precioVuelo'];
             if ($promoId) {
                 // La promoción tiene que ser de la aerolínea del vuelo, estar aprobada y vigente.
@@ -237,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $precioFinal = round($precioFinal * (1 - ((float)$promo['descuentoPromocion'] / 100)), 2);
             }
 
-            $reservaId = crearReserva((int)$user['id'], $vueloId, $promoId, $precioFinal);
+            $reservaId = crearReserva((int)$user['id'], $vueloId, $promoId, $precioFinal, $pasajero);
             if ($reservaId) {
                 $_SESSION['mensaje'] = '¡Reserva #' . $reservaId . ' generada con éxito! Podés abonarla ahora o gestionarla desde Mis Reservas.';
                 $_SESSION['tipo_mensaje'] = 'success';
@@ -305,14 +339,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // --- CONTACTO ---
         case 'contacto':
-            $nombreContacto = trim($_POST['nombre'] ?? 'Usuario');
+            $nombreContacto = trim($_POST['nombre'] ?? '');
             $emailContacto = trim($_POST['email'] ?? '');
-            $asuntoContacto = trim($_POST['asunto'] ?? 'Consulta general');
+            $asuntoContacto = trim($_POST['motivo'] ?? '');
             $mensajeContacto = trim($_POST['mensaje'] ?? '');
 
-            if (!empty($emailContacto)) {
-                enviarMailContacto($nombreContacto, $emailContacto, $asuntoContacto, $mensajeContacto);
-            }
+            rechazarSiHayError(primerError(
+                errNombrePersona($nombreContacto),
+                errEmail($emailContacto),
+                errTexto($asuntoContacto, 'el motivo de la consulta', 1, 100),
+                errTexto($mensajeContacto, 'El mensaje', 10, 2000)
+            ), 'index.php?pagina=contacto');
+
+            enviarMailContacto($nombreContacto, $emailContacto, $asuntoContacto, $mensajeContacto);
 
             $_SESSION['mensaje'] = '¡Muchas gracias por comunicarte! Tu mensaje fue registrado y te enviamos una constancia por correo.';
             $_SESSION['tipo_mensaje'] = 'success';
@@ -332,6 +371,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hora = trim($_POST['hora'] ?? '');
             $precio = (float)($_POST['precio'] ?? 0);
             $asientos = (int)($_POST['asientos'] ?? 0);
+
+            rechazarSiHayError(primerError(
+                errCiudad($origen, 'El origen'),
+                errCiudad($destino, 'El destino'),
+                mb_strtolower($origen) === mb_strtolower($destino) ? 'El origen y el destino no pueden ser iguales.' : null,
+                errFecha($fecha, 'la fecha de salida'),
+                errHora($hora),
+                errNumero((string)($_POST['precio'] ?? ''), 'El precio', 1000, 10000000),
+                errNumero((string)($_POST['asientos'] ?? ''), 'La cantidad de asientos', 1, 500, true)
+            ), 'index.php?pagina=ceo_vuelos');
 
             if (!fechaHoraVueloEsFutura($fecha, $hora)) {
                 $_SESSION['mensaje'] = 'La fecha y hora de salida deben ser posteriores al momento actual.';
@@ -362,6 +411,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hora = trim($_POST['hora'] ?? '');
             $precio = (float)($_POST['precio'] ?? 0);
             $asientos = (int)($_POST['asientos'] ?? 0);
+
+            rechazarSiHayError(primerError(
+                errCiudad($origen, 'El origen'),
+                errCiudad($destino, 'El destino'),
+                mb_strtolower($origen) === mb_strtolower($destino) ? 'El origen y el destino no pueden ser iguales.' : null,
+                errFecha($fecha, 'la fecha de salida'),
+                errHora($hora),
+                errNumero((string)($_POST['precio'] ?? ''), 'El precio', 1000, 10000000),
+                errNumero((string)($_POST['asientos'] ?? ''), 'La cantidad de asientos', 1, 500, true)
+            ), 'index.php?pagina=ceo_vuelos');
 
             if (!fechaHoraVueloEsFutura($fecha, $hora)) {
                 $_SESSION['mensaje'] = 'La fecha y hora de salida deben ser posteriores al momento actual.';
@@ -403,12 +462,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inicio = trim($_POST['fecha_inicio'] ?? '') ?: null;
             $fin = trim($_POST['fecha_fin'] ?? '') ?: null;
 
-            if ($descuento <= 0 || $descuento > 100) {
-                $_SESSION['mensaje'] = 'El porcentaje de descuento debe estar entre 1% y 100%.';
-                $_SESSION['tipo_mensaje'] = 'warning';
-                header('Location: index.php?pagina=ceo_promociones');
-                exit;
-            }
+            rechazarSiHayError(primerError(
+                errTexto($desc, 'La descripción', 5, 200),
+                errNumero((string)($_POST['descuento'] ?? ''), 'El porcentaje de descuento', 1, 90, true),
+                errFecha((string)$inicio, 'la fecha de inicio', false),
+                errFecha((string)$fin, 'la fecha de fin', false)
+            ), 'index.php?pagina=ceo_promociones');
 
             if (($errorFechas = validarRangoFechas($inicio, $fin)) !== null) {
                 $_SESSION['mensaje'] = $errorFechas;
@@ -451,6 +510,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ceoId = !empty($_POST['ceo_id']) ? (int)$_POST['ceo_id'] : null;
             $desc = trim($_POST['descripcion'] ?? '');
 
+            rechazarSiHayError(primerError(
+                errTexto($nombre, 'El nombre de la aerolínea', 2, 100),
+                preg_match('/^[A-Za-z0-9]{2,3}$/', $iata) ? null : 'El código IATA debe tener 2 o 3 letras o números (por ejemplo, AR).',
+                errCodigoLetras($pais, 'El código de país', 3, 3),
+                errTexto($desc, 'La descripción', 0, 200)
+            ), 'index.php?pagina=admin_aerolineas');
+
             if (crearAerolinea($nombre, $iata, $pais, $ceoId, $desc)) {
                 $_SESSION['mensaje'] = 'Aerolínea "' . htmlspecialchars($nombre) . '" dada de alta con éxito.';
                 $_SESSION['tipo_mensaje'] = 'success';
@@ -472,6 +538,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pais = trim($_POST['cod_pais'] ?? 'ARG');
             $ceoId = !empty($_POST['ceo_id']) ? (int)$_POST['ceo_id'] : null;
             $desc = trim($_POST['descripcion'] ?? '');
+
+            rechazarSiHayError(primerError(
+                errTexto($nombre, 'El nombre de la aerolínea', 2, 100),
+                preg_match('/^[A-Za-z0-9]{2,3}$/', $iata) ? null : 'El código IATA debe tener 2 o 3 letras o números (por ejemplo, AR).',
+                errCodigoLetras($pais, 'El código de país', 3, 3),
+                errTexto($desc, 'La descripción', 0, 200)
+            ), 'index.php?pagina=admin_aerolineas');
 
             if (modificarAerolinea($aeroId, $nombre, $iata, $pais, $ceoId, $desc)) {
                 $_SESSION['mensaje'] = 'Aerolínea actualizada correctamente.';
@@ -530,6 +603,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fPub = trim($_POST['fecha_publicacion'] ?? date('Y-m-d'));
             $fExp = trim($_POST['fecha_expiracion'] ?? date('Y-m-d', strtotime('+30 days')));
 
+            rechazarSiHayError(primerError(
+                errTexto($texto, 'El texto de la novedad', 10, 200),
+                errFecha($fPub, 'la fecha de publicación'),
+                errFecha($fExp, 'la fecha de expiración')
+            ), 'index.php?pagina=admin_novedades');
+
             if (($errorFechas = validarRangoFechas($fPub, $fExp)) !== null) {
                 $_SESSION['mensaje'] = $errorFechas;
                 $_SESSION['tipo_mensaje'] = 'warning';
@@ -556,6 +635,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $texto = trim($_POST['texto'] ?? '');
             $fPub = trim($_POST['fecha_publicacion'] ?? date('Y-m-d'));
             $fExp = trim($_POST['fecha_expiracion'] ?? date('Y-m-d', strtotime('+30 days')));
+
+            rechazarSiHayError(primerError(
+                errTexto($texto, 'El texto de la novedad', 10, 200),
+                errFecha($fPub, 'la fecha de publicación'),
+                errFecha($fExp, 'la fecha de expiración')
+            ), 'index.php?pagina=admin_novedades&editar=' . $novId);
 
             if (($errorFechas = validarRangoFechas($fPub, $fExp)) !== null) {
                 $_SESSION['mensaje'] = $errorFechas;

@@ -6,6 +6,12 @@
       "runtimeExecutable": "php",
       "runtimeArgs": ["-d", "extension_dir=C:/php/ext", "-d", "extension=pdo_mysql", "-d", "extension=openssl", "-d", "extension=mbstring", "-S", "localhost:8085", "-t", "public"],
       "port": 8085
+    },
+    {
+      "name": "php-sin-bd",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-d", "extension_dir=C:/php/ext", "-d", "extension=mbstring", "-S", "localhost:8086", "-t", "public"],
+      "port": 8086
     }
   ]
 }

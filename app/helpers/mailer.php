@@ -350,17 +350,22 @@ HTML;
 function enviarMailContacto(string $nombre, string $email, string $asunto, string $mensaje): bool
 {
     $asuntoMail = "Nuevo mensaje de contacto: " . $asunto;
+    // Lo que escribe el visitante se escapa para que no pueda inyectar HTML en el correo.
+    $nombreH = htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8');
+    $emailH = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+    $asuntoH = htmlspecialchars($asunto, ENT_QUOTES, 'UTF-8');
+    $mensajeH = nl2br(htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8'));
     $html = <<<HTML
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #1b0088; color: #ffffff; padding: 20px;">
             <h2 style="margin: 0; font-size: 20px;">Mensaje de Contacto Recibido</h2>
         </div>
         <div style="padding: 24px; color: #333333; line-height: 1.6;">
-            <p><strong>Remitente:</strong> {$nombre} &lt;{$email}&gt;</p>
-            <p><strong>Asunto:</strong> {$asunto}</p>
+            <p><strong>Remitente:</strong> {$nombreH} &lt;{$emailH}&gt;</p>
+            <p><strong>Asunto:</strong> {$asuntoH}</p>
             <p><strong>Mensaje:</strong></p>
             <div style="background-color: #f8f9fa; padding: 16px; border-radius: 4px; border-left: 4px solid #70d6ff;">
-                {$mensaje}
+                {$mensajeH}
             </div>
         </div>
     </div>

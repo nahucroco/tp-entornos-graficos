@@ -46,11 +46,11 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
             <div class="row g-3">
                 <div class="col-md-8">
                     <label for="p-desc" class="form-label small fw-bold">Descripción de la Promoción <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="p-desc" name="descripcion" required placeholder="Ej: 25% OFF en vuelos de primavera">
+                    <input type="text" class="form-control" id="p-desc" data-zod="descripcionPromocion" name="descripcion" required placeholder="Ej: 25% OFF en vuelos de primavera">
                 </div>
                 <div class="col-md-4">
                     <label for="p-desc-porc" class="form-label small fw-bold">Porcentaje de Descuento (%) <span class="text-danger">*</span></label>
-                    <input type="number" step="1" min="1" max="90" class="form-control" id="p-desc-porc" name="descuento" required placeholder="Ej: 20">
+                    <input type="number" step="1" min="1" max="90" class="form-control" id="p-desc-porc" data-zod="descuento" name="descuento" required placeholder="Ej: 20">
                 </div>
                 <div class="col-md-6">
                     <label for="p-inicio" class="form-label small fw-bold">Fecha de Inicio</label>
@@ -58,7 +58,7 @@ $promociones = obtenerPromocionesPorCeo((int)$usuario['id']);
                 </div>
                 <div class="col-md-6">
                     <label for="p-fin" class="form-label small fw-bold">Fecha de Vencimiento / Fin</label>
-                    <input type="date" class="form-control" id="p-fin" name="fecha_fin" value="<?= date('Y-m-d', strtotime('+30 days')) ?>">
+                    <input type="date" class="form-control" id="p-fin" data-zod="" data-zod-desde="fecha_inicio" name="fecha_fin" value="<?= date('Y-m-d', strtotime('+30 days')) ?>">
                 </div>
             </div>
 

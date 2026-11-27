@@ -42,7 +42,7 @@ unset($_SESSION['enlace_validacion_demo'], $_SESSION['email_sin_validar']);
                     <label for="login-email" class="form-label small fw-bold">Correo electrónico</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                        <input type="email" class="form-control" id="login-email" name="email" required placeholder="nombre@correo.com">
+                        <input type="email" class="form-control" id="login-email" data-zod="email" name="email" required placeholder="nombre@correo.com">
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@ unset($_SESSION['enlace_validacion_demo'], $_SESSION['email_sin_validar']);
                     <?= campoCsrf() ?>
                     <label for="reenviar-email" class="form-label small fw-bold">Correo electrónico con el que te registraste</label>
                     <div class="input-group">
-                        <input type="email" class="form-control form-control-sm" id="reenviar-email" name="email" required
+                        <input type="email" class="form-control form-control-sm" id="reenviar-email" data-zod="email" name="email" required
                                value="<?= htmlspecialchars($emailSinValidar) ?>" placeholder="nombre@correo.com">
                         <button type="submit" class="btn btn-sm btn-outline-primary">Reenviar enlace</button>
                     </div>

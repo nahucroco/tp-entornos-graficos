@@ -56,7 +56,7 @@ if ($editarId) {
             <div class="row g-3">
                 <div class="col-12">
                     <label for="nov-texto" class="form-label small fw-bold">Texto del Comunicado / Anuncio <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="nov-texto" name="texto" rows="3" required placeholder="Escribí aquí el mensaje oficial para los pasajeros..."><?= htmlspecialchars($novedadEditar['textoNovedad'] ?? '') ?></textarea>
+                    <textarea class="form-control" id="nov-texto" data-zod="textoNovedad" name="texto" rows="3" required placeholder="Escribí aquí el mensaje oficial para los pasajeros..."><?= htmlspecialchars($novedadEditar['textoNovedad'] ?? '') ?></textarea>
                 </div>
                 <div class="col-md-6">
                     <label for="nov-pub" class="form-label small fw-bold">Fecha de Publicación <span class="text-danger">*</span></label>
@@ -64,7 +64,7 @@ if ($editarId) {
                 </div>
                 <div class="col-md-6">
                     <label for="nov-exp" class="form-label small fw-bold">Fecha de Expiración / Vencimiento <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="nov-exp" name="fecha_expiracion" value="<?= htmlspecialchars($novedadEditar['fechaExpiracionNovedad'] ?? date('Y-m-d', strtotime('+30 days'))) ?>" required>
+                    <input type="date" class="form-control" id="nov-exp" data-zod="" data-zod-desde="fecha_publicacion" name="fecha_expiracion" value="<?= htmlspecialchars($novedadEditar['fechaExpiracionNovedad'] ?? date('Y-m-d', strtotime('+30 days'))) ?>" required>
                 </div>
             </div>
 

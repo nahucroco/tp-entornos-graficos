@@ -44,6 +44,7 @@ $novedades = obtenerNovedadesVigentes();
                         $horasParaVuelo = ($tsVuelo - time()) / 3600;
                         $puedeCancelar = $horasParaVuelo >= 72;
                         $puedePagar = $tsVuelo > time();
+                        $vencePago = vencimientoPagoReserva($res['fechaReserva']);
                     ?>
                     <article class="card shadow-sm border-0 rounded-4 p-4 bg-white">
                         <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
@@ -63,7 +64,11 @@ $novedades = obtenerNovedadesVigentes();
                                     <i class="bi bi-calendar3 me-1"></i><?= $fechaVuelo ?> a las <?= $horaVuelo ?> hs
                                 </div>
                                 <div class="small text-secondary">
-                                    Titular: <strong><?= htmlspecialchars($usuario['nombre']) ?></strong>
+                                    Titular: <strong><?= htmlspecialchars(($res['nombrePasajero'] ?? '') ?: $usuario['nombre']) ?></strong>
+                                    <?php if (!empty($res['dniPasajero'])): ?> · DNI/Pasaporte: <?= htmlspecialchars($res['dniPasajero']) ?><?php endif; ?>
+                                </div>
+                                <div class="small text-danger fw-semibold mt-1">
+                                    <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Pagala antes del <?= date('d/m/Y H:i', $vencePago) ?> hs o se cancela automáticamente.
                                 </div>
                             </div>
                             <div class="col-md-5 text-md-end mt-3 mt-md-0">

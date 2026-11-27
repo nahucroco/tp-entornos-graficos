@@ -53,15 +53,15 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="a-nombre" class="form-label small fw-bold">Nombre de la Aerolínea <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="a-nombre" name="nombre" value="<?= htmlspecialchars($aeroEditar['nombreAerolinea'] ?? '') ?>" required placeholder="Ej: Austral Líneas Aéreas">
+                    <input type="text" class="form-control" id="a-nombre" data-zod="nombreAerolinea" name="nombre" value="<?= htmlspecialchars($aeroEditar['nombreAerolinea'] ?? '') ?>" required placeholder="Ej: Austral Líneas Aéreas">
                 </div>
                 <div class="col-md-3">
                     <label for="a-iata" class="form-label small fw-bold">Código IATA (3 letras) <span class="text-danger">*</span></label>
-                    <input type="text" maxlength="3" class="form-control text-uppercase" id="a-iata" name="codigo_iata" value="<?= htmlspecialchars($aeroEditar['codigoIATA'] ?? '') ?>" required placeholder="Ej: AUS">
+                    <input type="text" maxlength="3" class="form-control text-uppercase" id="a-iata" data-zod="codigoIata" name="codigo_iata" value="<?= htmlspecialchars($aeroEditar['codigoIATA'] ?? '') ?>" required placeholder="Ej: AUS">
                 </div>
                 <div class="col-md-3">
                     <label for="a-pais" class="form-label small fw-bold">Código País (ISO 3) <span class="text-danger">*</span></label>
-                    <input type="text" maxlength="3" class="form-control text-uppercase" id="a-pais" name="cod_pais" value="<?= htmlspecialchars($aeroEditar['codPais'] ?? 'ARG') ?>" required placeholder="ARG">
+                    <input type="text" maxlength="3" class="form-control text-uppercase" id="a-pais" data-zod="codigoPais" name="cod_pais" value="<?= htmlspecialchars($aeroEditar['codPais'] ?? 'ARG') ?>" required placeholder="ARG">
                 </div>
                 <div class="col-md-6">
                     <label for="a-ceo" class="form-label small fw-bold">Asignar CEO de Aerolínea</label>
@@ -76,7 +76,7 @@ $aeroEditar = $editarId ? obtenerAerolineaPorId($editarId) : null;
                 </div>
                 <div class="col-md-6">
                     <label for="a-desc" class="form-label small fw-bold">Descripción Institucional</label>
-                    <input type="text" class="form-control" id="a-desc" name="descripcion" value="<?= htmlspecialchars($aeroEditar['descripcionAerolinea'] ?? '') ?>" placeholder="Breve descripción comercial">
+                    <input type="text" class="form-control" id="a-desc" data-zod="descripcionAerolinea" name="descripcion" value="<?= htmlspecialchars($aeroEditar['descripcionAerolinea'] ?? '') ?>" placeholder="Breve descripción comercial">
                 </div>
             </div>
 

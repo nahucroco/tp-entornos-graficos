@@ -74,6 +74,8 @@
 <!-- Bootstrap 5.3 Bundle con Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Scripts de interacción y validaciones -->
+<!-- Esquemas Zod: se cargan como módulo antes de que validaciones.js arranque (DOMContentLoaded) -->
+<script type="module" src="assets/js/esquemas-zod.js"></script>
 <script src="assets/js/validaciones.js"></script>
 </body>
 </html>

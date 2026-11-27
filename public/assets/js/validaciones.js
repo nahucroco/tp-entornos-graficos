@@ -93,7 +93,11 @@ const obtenerFeedback = (campo) => {
 const validarCampo = (campo) => {
     if (!campo.willValidate) return;
     campo.setCustomValidity('');
-    const mensaje = campo.validity.valid ? '' : mensajeValidacion(campo);
+    let mensaje = campo.validity.valid ? '' : mensajeValidacion(campo);
+    // Si pasó la validación nativa, se aplican las reglas de Zod (esquemas-zod.js), si cargaron.
+    if (!mensaje && campo.dataset.zod !== undefined && typeof window.validacionZod === 'function') {
+        mensaje = window.validacionZod(campo);
+    }
     campo.setCustomValidity(mensaje);
 
     if (campo.form && campo.form.noValidate) {
@@ -105,10 +109,16 @@ const validarCampo = (campo) => {
 document.addEventListener('DOMContentLoaded', () => {
     // 0. Mensajes de validación en español para todos los formularios
     document.querySelectorAll('form').forEach(form => {
+        // Campos cuya validez depende de otro (repetir contraseña, destino ≠ origen, fecha fin ≥ inicio)
+        const dependientes = form.querySelectorAll('[data-zod-igual-a], [data-zod-distinto-de], [data-zod-desde]');
+        const alCambiar = (campo) => {
+            validarCampo(campo);
+            dependientes.forEach(dep => { if (dep !== campo) validarCampo(dep); });
+        };
         camposValidables(form).forEach(campo => {
             validarCampo(campo);
-            campo.addEventListener('input', () => validarCampo(campo));
-            campo.addEventListener('change', () => validarCampo(campo));
+            campo.addEventListener('input', () => alCambiar(campo));
+            campo.addEventListener('change', () => alCambiar(campo));
             campo.addEventListener('invalid', () => validarCampo(campo));
         });
     });

@@ -36,15 +36,15 @@ $aerolineas = obtenerAerolineas();
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="reg-nombre" class="form-label small fw-bold">Nombre/s <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="reg-nombre" name="nombre" required placeholder="Ej. Juan Carlos">
+                            <input type="text" class="form-control" id="reg-nombre" data-zod="nombrePersona" name="nombre" required placeholder="Ej. Juan Carlos">
                         </div>
                         <div class="col-md-6">
                             <label for="reg-apellido" class="form-label small fw-bold">Apellido/s <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="reg-apellido" name="apellido" required placeholder="Ej. Pérez">
+                            <input type="text" class="form-control" id="reg-apellido" data-zod="apellido" name="apellido" required placeholder="Ej. Pérez">
                         </div>
                         <div class="col-md-4">
                             <label for="reg-dni" class="form-label small fw-bold">DNI / Pasaporte <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="reg-dni" name="dni" required placeholder="Ej. 38555123">
+                            <input type="text" class="form-control" id="reg-dni" data-zod="documento" name="dni" required placeholder="Ej. 38555123">
                         </div>
                         <div class="col-md-4">
                             <label for="reg-fecha-nac" class="form-label small fw-bold">Fecha de Nacimiento</label>
@@ -71,15 +71,15 @@ $aerolineas = obtenerAerolineas();
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="reg-telefono" class="form-label small fw-bold">Teléfono fijo</label>
-                            <input type="tel" class="form-control" id="reg-telefono" name="telefono_fijo" placeholder="Ej. 341-4200000">
+                            <input type="tel" class="form-control" id="reg-telefono" data-zod="telefono" name="telefono_fijo" placeholder="Ej. 341-4200000">
                         </div>
                         <div class="col-md-6">
                             <label for="reg-celular" class="form-label small fw-bold">Teléfono celular <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="reg-celular" name="telefono" maxlength="20" required placeholder="Ej. 341-155000000">
+                            <input type="tel" class="form-control" id="reg-celular" data-zod="telefono" name="telefono" maxlength="20" required placeholder="Ej. 341-155000000">
                         </div>
                         <div class="col-12">
                             <label for="reg-direccion" class="form-label small fw-bold">Dirección de residencia</label>
-                            <input type="text" class="form-control" id="reg-direccion" name="direccion" placeholder="Calle, número, ciudad">
+                            <input type="text" class="form-control" id="reg-direccion" data-zod="direccion" name="direccion" placeholder="Calle, número, ciudad">
                         </div>
                     </div>
                 </fieldset>
@@ -92,7 +92,7 @@ $aerolineas = obtenerAerolineas();
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="reg-email" class="form-label small fw-bold">Correo Electrónico <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="reg-email" name="email" required placeholder="tu@email.com">
+                            <input type="email" class="form-control" id="reg-email" data-zod="email" name="email" required placeholder="tu@email.com">
                         </div>
                         <div class="col-md-6">
                             <label for="reg-tipo" class="form-label small fw-bold">Tipo de Cuenta <span class="text-danger">*</span></label>
@@ -104,7 +104,7 @@ $aerolineas = obtenerAerolineas();
                         <div class="col-md-6">
                             <label for="reg-clave" class="form-label small fw-bold">Contraseña <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="reg-clave" name="clave" minlength="6" required placeholder="Mínimo 6 caracteres">
+                                <input type="password" class="form-control" id="reg-clave" data-zod="clave" name="clave" minlength="6" required placeholder="Mínimo 6 caracteres">
                                 <button class="btn btn-outline-secondary" type="button" data-toggle-password="reg-clave" aria-label="Mostrar contraseña" aria-pressed="false">
                                     <i class="bi bi-eye" aria-hidden="true"></i>
                                 </button>
@@ -113,7 +113,7 @@ $aerolineas = obtenerAerolineas();
                         <div class="col-md-6">
                             <label for="reg-clave2" class="form-label small fw-bold">Confirmar Contraseña <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="reg-clave2" name="clave_confirm" minlength="6" required placeholder="Repetí tu contraseña">
+                                <input type="password" class="form-control" id="reg-clave2" data-zod="clave" data-zod-igual-a="clave" name="clave_confirm" minlength="6" required placeholder="Repetí tu contraseña">
                                 <button class="btn btn-outline-secondary" type="button" data-toggle-password="reg-clave2" aria-label="Mostrar confirmación de contraseña" aria-pressed="false">
                                     <i class="bi bi-eye" aria-hidden="true"></i>
                                 </button>

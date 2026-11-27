@@ -25,7 +25,7 @@ declare(strict_types=1);
     <section class="mb-4">
         <h2 class="h5 fw-bold text-primary">2. Política de Reservas y Pagos</h2>
         <p class="text-secondary small">
-            Toda reserva generada en el portal comienza con el estado <strong>"pendiente de pago"</strong>. Al registrar la reserva se reserva de manera inmediata un asiento del cupo disponible del vuelo seleccionado. Cuando el pasajero abona y confirma la transacción, la reserva cambia al estado <strong>"confirmada"</strong>, constituyendo una compra en firme y emitiendo el ticket electrónico.
+            Toda reserva generada en el portal comienza con el estado <strong>"pendiente de pago"</strong>. Al registrar la reserva se reserva de manera inmediata un asiento del cupo disponible del vuelo seleccionado. Cuando el pasajero abona y confirma la transacción, la reserva cambia al estado <strong>"confirmada"</strong>, constituyendo una compra en firme y emitiendo el ticket electrónico. Si el pago no se registra dentro de las <strong>72 horas</strong> de realizada la reserva, ésta se cancela automáticamente y el asiento vuelve a quedar disponible.
         </p>
     </section>
 

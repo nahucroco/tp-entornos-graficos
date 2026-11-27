@@ -435,6 +435,15 @@ function contarTotalReservasPorUsuario(int $codUsuario, ?string $estado = null):
  * Marca como 'cancelada' las reservas 'pendiente de pago' cuyo vuelo ya partió
  * y libera los asientos correspondientes.
  */
+/** Horas que tiene el pasajero para pagar una reserva antes de que se cancele sola. */
+const HORAS_LIMITE_PAGO_RESERVA = 72;
+
+/**
+ * Cancela las reservas 'pendiente de pago' que:
+ *  - cumplieron 72 horas desde que se hicieron sin que se registre el pago, o
+ *  - cuyo vuelo ya partió.
+ * Devuelve el asiento al vuelo. Sin $codUsuario procesa las reservas de todos los usuarios.
+ */
 function expirarReservasVencidas(?int $codUsuario = null): int
 {
     try {
@@ -445,7 +454,8 @@ function expirarReservasVencidas(?int $codUsuario = null): int
                 FROM reservas r
                 INNER JOIN vuelos v ON r.codVuelo = v.codVuelo
                 WHERE r.estadoReserva = 'pendiente de pago'
-                  AND TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) <= NOW()";
+                  AND (r.fechaReserva <= NOW() - INTERVAL " . HORAS_LIMITE_PAGO_RESERVA . " HOUR
+                       OR TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) <= NOW())";
         $params = [];
         if ($codUsuario !== null) {
             $sql .= " AND r.codUsuario = ?";
@@ -479,6 +489,27 @@ function expirarReservasVencidas(?int $codUsuario = null): int
         error_log("Error al expirar reservas vencidas: " . $e->getMessage());
         return 0;
     }
+}
+
+/** Momento (timestamp) en que vence el plazo de pago de una reserva. */
+function vencimientoPagoReserva(string $fechaReserva): int
+{
+    return (int)strtotime($fechaReserva) + HORAS_LIMITE_PAGO_RESERVA * 3600;
+}
+
+/**
+ * Corre la cancelación automática para todo el sistema como mucho una vez por minuto
+ * (se llama en cada pedido desde index.php; no hace falta un cron).
+ */
+function expirarReservasVencidasGlobal(): void
+{
+    $marca = sys_get_temp_dir() . '/condor_expiracion_reservas.txt';
+    $ultima = @filemtime($marca);
+    if ($ultima !== false && $ultima > time() - 60) {
+        return;
+    }
+    @touch($marca);
+    expirarReservasVencidas();
 }
 
 function obtenerReservasPorUsuario(
@@ -538,7 +569,8 @@ function obtenerReservaPorId(int $codReserva): ?array
         $res = $stmt->fetch();
         if ($res && $res['estadoReserva'] === 'pendiente de pago') {
             $tsVuelo = strtotime($res['fechaSalidaVuelo'] . ' ' . $res['horaSalidaVuelo']);
-            if ($tsVuelo !== false && $tsVuelo <= time()) {
+            $vencePago = vencimientoPagoReserva($res['fechaReserva']);
+            if (($tsVuelo !== false && $tsVuelo <= time()) || $vencePago <= time()) {
                 if (expirarReservasVencidas((int)$res['codUsuario']) > 0) {
                     $stmt->execute([$codReserva]);
                     $res = $stmt->fetch();
@@ -555,7 +587,7 @@ function obtenerReservaPorId(int $codReserva): ?array
 /**
  * Crea una reserva en estado 'pendiente de pago' y decrementa el asiento disponible.
  */
-function crearReserva(int $codUsuario, int $codVuelo, ?int $codPromocion, float $precioFinal): ?int
+function crearReserva(int $codUsuario, int $codVuelo, ?int $codPromocion, float $precioFinal, array $pasajero = []): ?int
 {
     try {
         $db = Database::getConnection();
@@ -578,9 +610,13 @@ function crearReserva(int $codUsuario, int $codVuelo, ?int $codPromocion, float 
         $stmt->execute([$codVuelo]);
 
         // 3. Insertar reserva con estado 'pendiente de pago'
-        $stmt = $db->prepare("INSERT INTO reservas (codUsuario, codVuelo, codPromocion, fechaReserva, precioFinal, estadoReserva)
-                              VALUES (?, ?, ?, NOW(), ?, 'pendiente de pago')");
-        $stmt->execute([$codUsuario, $codVuelo, $codPromocion ?: null, $precioFinal]);
+        $stmt = $db->prepare("INSERT INTO reservas (codUsuario, codVuelo, codPromocion, fechaReserva, precioFinal, estadoReserva,
+                                                    nombrePasajero, dniPasajero, emailPasajero, telefonoPasajero)
+                              VALUES (?, ?, ?, NOW(), ?, 'pendiente de pago', ?, ?, ?, ?)");
+        $stmt->execute([
+            $codUsuario, $codVuelo, $codPromocion ?: null, $precioFinal,
+            $pasajero['nombre'] ?? null, $pasajero['dni'] ?? null, $pasajero['email'] ?? null, $pasajero['telefono'] ?? null,
+        ]);
         $codReserva = (int) $db->lastInsertId();
 
         $db->commit();
@@ -608,6 +644,7 @@ function confirmarPagoReserva(int $codReserva, int $codUsuario): bool
                               WHERE r.codReserva = ?
                                 AND r.codUsuario = ?
                                 AND r.estadoReserva = 'pendiente de pago'
+                                AND r.fechaReserva > NOW() - INTERVAL " . HORAS_LIMITE_PAGO_RESERVA . " HOUR
                                 AND TIMESTAMP(v.fechaSalidaVuelo, v.horaSalidaVuelo) > NOW()");
         return $stmt->execute([$codReserva, $codUsuario]) && $stmt->rowCount() > 0;
     } catch (Throwable $e) {

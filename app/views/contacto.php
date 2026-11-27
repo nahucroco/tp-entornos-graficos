@@ -25,11 +25,11 @@ declare(strict_types=1);
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="contacto-nombre" class="form-label small fw-bold">Nombre completo</label>
-                        <input type="text" class="form-control" id="contacto-nombre" name="nombre" required placeholder="Tu nombre">
+                        <input type="text" class="form-control" id="contacto-nombre" data-zod="nombrePersona" name="nombre" required placeholder="Tu nombre">
                     </div>
                     <div class="col-md-6">
                         <label for="contacto-email" class="form-label small fw-bold">Correo electrónico</label>
-                        <input type="email" class="form-control" id="contacto-email" name="email" required placeholder="tu@email.com">
+                        <input type="email" class="form-control" id="contacto-email" data-zod="email" name="email" required placeholder="tu@email.com">
                     </div>
                     <div class="col-12">
                         <label for="contacto-motivo" class="form-label small fw-bold">Motivo de contacto</label>
@@ -44,7 +44,7 @@ declare(strict_types=1);
                     </div>
                     <div class="col-12">
                         <label for="contacto-mensaje" class="form-label small fw-bold">Mensaje o consulta</label>
-                        <textarea class="form-control" id="contacto-mensaje" name="mensaje" rows="4" required placeholder="Escribí tu consulta detalladamente..."></textarea>
+                        <textarea class="form-control" id="contacto-mensaje" data-zod="mensajeContacto" name="mensaje" rows="4" required placeholder="Escribí tu consulta detalladamente..."></textarea>
                     </div>
                 </div>
 

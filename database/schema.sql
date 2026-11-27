@@ -75,6 +75,10 @@ CREATE TABLE IF NOT EXISTS reservas (
     fechaReserva DATETIME DEFAULT CURRENT_TIMESTAMP,
     precioFinal DECIMAL(10,2) NOT NULL,
     estadoReserva ENUM('pendiente de pago', 'confirmada', 'cancelada') NOT NULL DEFAULT 'pendiente de pago',
+    nombrePasajero VARCHAR(100) DEFAULT NULL,
+    dniPasajero VARCHAR(20) DEFAULT NULL,
+    emailPasajero VARCHAR(100) DEFAULT NULL,
+    telefonoPasajero VARCHAR(20) DEFAULT NULL,
     CONSTRAINT fk_reserva_usuario FOREIGN KEY (codUsuario) REFERENCES usuarios(codUsuario) ON DELETE CASCADE,
     CONSTRAINT fk_reserva_vuelo FOREIGN KEY (codVuelo) REFERENCES vuelos(codVuelo) ON DELETE CASCADE,
     CONSTRAINT fk_reserva_promocion FOREIGN KEY (codPromocion) REFERENCES promociones(codPromocion) ON DELETE SET NULL

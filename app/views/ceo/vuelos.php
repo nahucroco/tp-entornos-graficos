@@ -61,11 +61,11 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="v-origen" class="form-label small fw-bold">Origen (Aeropuerto / Ciudad) <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="v-origen" name="origen" value="<?= htmlspecialchars($vueloEditar['origenVuelo'] ?? '') ?>" required placeholder="Ej. Rosario (ROS)">
+                    <input type="text" class="form-control" id="v-origen" data-zod="ciudadOrigen" name="origen" value="<?= htmlspecialchars($vueloEditar['origenVuelo'] ?? '') ?>" required placeholder="Ej. Rosario (ROS)">
                 </div>
                 <div class="col-md-6">
                     <label for="v-destino" class="form-label small fw-bold">Destino (Aeropuerto / Ciudad) <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="v-destino" name="destino" value="<?= htmlspecialchars($vueloEditar['destinoVuelo'] ?? '') ?>" required placeholder="Ej. Bariloche (BRC)">
+                    <input type="text" class="form-control" id="v-destino" data-zod="ciudadDestino" data-zod-distinto-de="origen" name="destino" value="<?= htmlspecialchars($vueloEditar['destinoVuelo'] ?? '') ?>" required placeholder="Ej. Bariloche (BRC)">
                 </div>
                 <div class="col-md-3">
                     <label for="v-fecha" class="form-label small fw-bold">Fecha de Salida <span class="text-danger">*</span></label>
@@ -77,11 +77,11 @@ $vueloEditar = $editarId ? obtenerVueloPorId($editarId) : null;
                 </div>
                 <div class="col-md-3">
                     <label for="v-precio" class="form-label small fw-bold">Precio / Tarifa (ARS) <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" min="1000" class="form-control" id="v-precio" name="precio" value="<?= htmlspecialchars((string)($vueloEditar['precioVuelo'] ?? '50000')) ?>" required>
+                    <input type="number" step="0.01" min="1000" class="form-control" id="v-precio" data-zod="precioVuelo" name="precio" value="<?= htmlspecialchars((string)($vueloEditar['precioVuelo'] ?? '50000')) ?>" required>
                 </div>
                 <div class="col-md-3">
                     <label for="v-asientos" class="form-label small fw-bold">Asientos Disponibles <span class="text-danger">*</span></label>
-                    <input type="number" min="1" max="500" class="form-control" id="v-asientos" name="asientos" value="<?= htmlspecialchars((string)($vueloEditar['asientosDisponibles'] ?? '40')) ?>" required>
+                    <input type="number" min="1" max="500" class="form-control" id="v-asientos" data-zod="asientos" name="asientos" value="<?= htmlspecialchars((string)($vueloEditar['asientosDisponibles'] ?? '40')) ?>" required>
                 </div>
             </div>
 

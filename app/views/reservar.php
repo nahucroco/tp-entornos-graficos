@@ -13,6 +13,11 @@ if (!$vuelo) {
 
 $promociones = obtenerPromocionesPorAerolinea((int)$vuelo['codAerolinea']);
 $usuario = obtenerUsuario();
+
+// Si el servidor rechazó los datos, se vuelven a mostrar los que el usuario había cargado.
+$previo = $_SESSION['form_reserva'] ?? [];
+unset($_SESSION['form_reserva']);
+$valor = fn(string $campo, string $porDefecto = '') => htmlspecialchars((string)($previo[$campo] ?? $porDefecto));
 ?>
 
 <nav class="breadcrumb-condor" aria-label="Ruta de navegación">
@@ -65,19 +70,19 @@ $usuario = obtenerUsuario();
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="pasajero-nombre" class="form-label small fw-bold">Nombre completo</label>
-                            <input type="text" class="form-control" id="pasajero-nombre" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
+                            <input type="text" class="form-control" id="pasajero-nombre" name="nombre" value="<?= $valor('nombre', $usuario['nombre']) ?>" required data-zod="nombrePersona" autocomplete="name">
                         </div>
                         <div class="col-md-6">
                             <label for="pasajero-dni" class="form-label small fw-bold">DNI / Pasaporte</label>
-                            <input type="text" class="form-control" id="pasajero-dni" name="dni" placeholder="Ej: 38123456" required>
+                            <input type="text" class="form-control" id="pasajero-dni" name="dni" value="<?= $valor('dni') ?>" placeholder="Ej: 38123456" required data-zod="documento">
                         </div>
                         <div class="col-md-6">
                             <label for="pasajero-email" class="form-label small fw-bold">Correo electrónico</label>
-                            <input type="email" class="form-control" id="pasajero-email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" required>
+                            <input type="email" class="form-control" id="pasajero-email" name="email" value="<?= $valor('email', $usuario['email']) ?>" required data-zod="email" autocomplete="email">
                         </div>
                         <div class="col-md-6">
                             <label for="pasajero-telefono" class="form-label small fw-bold">Teléfono de contacto</label>
-                            <input type="tel" class="form-control" id="pasajero-telefono" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" placeholder="Ej: 341-555-0123" required>
+                            <input type="tel" class="form-control" id="pasajero-telefono" name="telefono" value="<?= $valor('telefono', $usuario['telefono'] ?? '') ?>" placeholder="Ej: 341-555-0123" required data-zod="telefono" autocomplete="tel">
                         </div>
                     </div>
                 </div>
@@ -91,9 +96,9 @@ $usuario = obtenerUsuario();
                         Seleccioná un descuento autorizado para aplicar sobre la tarifa:
                     </label>
                     <select class="form-select" id="select-promocion" name="promocion_id">
-                        <option value="" data-descuento="0" selected>Sin promoción (Tarifa estándar)</option>
+                        <option value="" data-descuento="0">Sin promoción (Tarifa estándar)</option>
                         <?php foreach ($promociones as $promo): ?>
-                            <option value="<?= $promo['codPromocion'] ?>" data-descuento="<?= (float)$promo['descuentoPromocion'] ?>">
+                            <option value="<?= $promo['codPromocion'] ?>"<?= (int)($previo['promocion_id'] ?? 0) === (int)$promo['codPromocion'] ? ' selected' : '' ?> data-descuento="<?= (float)$promo['descuentoPromocion'] ?>">
                                 <?= htmlspecialchars($promo['descripcionPromocion']) ?> (<?= (int)$promo['descuentoPromocion'] ?>% Descuento)
                             </option>
                         <?php endforeach; ?>
@@ -158,7 +163,7 @@ $usuario = obtenerUsuario();
 
             <div class="p-2 bg-warning bg-opacity-10 border border-warning rounded-2 small text-dark">
                 <i class="bi bi-info-circle-fill text-warning me-1"></i>
-                La reserva se emitirá como <strong>"pendiente de pago"</strong> y asegurará tu asiento de inmediato.
+                La reserva se emitirá como <strong>"pendiente de pago"</strong> y asegurará tu asiento de inmediato. Tenés <?= HORAS_LIMITE_PAGO_RESERVA ?> horas para pagarla; si no, se cancela automáticamente.
             </div>
         </aside>
     </div>

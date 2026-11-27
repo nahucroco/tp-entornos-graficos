@@ -51,7 +51,7 @@ $usuario = obtenerUsuario();
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="perfil-nombre" class="form-label small fw-bold">Nombre completo</label>
-                        <input type="text" class="form-control" id="perfil-nombre" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
+                        <input type="text" class="form-control" id="perfil-nombre" data-zod="nombrePersona" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
                     </div>
                     <div class="col-md-6">
                         <label for="perfil-email" class="form-label small fw-bold">Correo Electrónico (No modificable)</label>
@@ -59,7 +59,7 @@ $usuario = obtenerUsuario();
                     </div>
                     <div class="col-md-6">
                         <label for="perfil-telefono" class="form-label small fw-bold">Teléfono de contacto</label>
-                        <input type="tel" class="form-control" id="perfil-telefono" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" placeholder="Ej: 341-555-0100">
+                        <input type="tel" class="form-control" id="perfil-telefono" data-zod="telefono" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" placeholder="Ej: 341-555-0100">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Tipo de Perfil</label>

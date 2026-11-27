@@ -23,7 +23,7 @@ declare(strict_types=1);
                     <label for="recuperar-email" class="form-label small fw-bold">Correo Electrónico</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                        <input type="email" class="form-control" id="recuperar-email" name="email" required placeholder="tu@email.com">
+                        <input type="email" class="form-control" id="recuperar-email" data-zod="email" name="email" required placeholder="tu@email.com">
                     </div>
                 </div>
 
